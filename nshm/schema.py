@@ -1,0 +1,50 @@
+from graphene import relay, ObjectType
+from graphene_django import DjangoObjectType
+from graphene_django.filter import DjangoFilterConnectionField
+
+from nshm import models
+# import Category, Ingredient
+
+# Graphene will automatically map the Category model's fields onto the CategoryNode.
+# This is configured in the CategoryNode's Meta class (as you can see below)
+class SourceLogicTree(DjangoObjectType):
+    class Meta:
+        model = models.SourceLogicTree
+        filter_fields = ['version', 'notes']
+        interfaces = (relay.Node, )
+
+class SeismicHazardModel(DjangoObjectType):
+    class Meta:
+        model = models.SeismicHazardModel
+
+        # Allow for some more advanced filtering here
+        filter_fields = {
+            'version': ['exact', 'icontains', 'istartswith'],
+            'notes': ['icontains'],
+            'source_logic_tree__version': ['exact'],
+            # 'category__name': ['exact'],
+        }
+        interfaces = (relay.Node, )
+
+class SourceLogicTreeComponent(DjangoObjectType):
+    class Meta:    
+        model = models.SourceLogicTreeComponent
+        interfaces = (relay.Node, )
+        filter_fields = ['tag', 'notes', 'inversion_toshi_id', 'group', 'tectonic_region']
+
+class SourceLogicTreeWeightedComponent(DjangoObjectType):
+    class Meta:
+        model = models.SourceLogicTreeWeightedComponent
+        interfaces = (relay.Node, )
+
+class Query(ObjectType):
+    seismic_hazard_model = relay.Node.Field(SeismicHazardModel)
+    all_seismic_hazard_models = DjangoFilterConnectionField(SeismicHazardModel)
+
+    source_logic_tree = relay.Node.Field(SourceLogicTree)
+    all_source_logic_trees = DjangoFilterConnectionField(SourceLogicTree)
+
+    source_logic_tree_component = relay.Node.Field(SourceLogicTreeComponent)
+    all_source_logic_tree_components = DjangoFilterConnectionField(SourceLogicTreeComponent)
+
+    # source_logic_tree_weighted_component = relay.Node.Field(SourceLogicTreeWeightedComponent)

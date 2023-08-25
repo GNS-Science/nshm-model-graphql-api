@@ -1,14 +1,17 @@
 [tool.poetry]
-name = "django-demo"
+name = "nzshm-model-graphql-api"
 version = "0.1.0"
 description = ""
 authors = ["Your Name <you@example.com>"]
 license = "n"
 readme = "README.md"
-packages = [{include = "django_demo"}]
+packages = [{include = "nzshm_model_graphql_api"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
+django = "^4.2.4"
+graphene-django = "^3.1.5"
+django-filter = "^23.2"
 
 
 [build-system]
