@@ -4,13 +4,17 @@ from .models import (
     SeismicHazardModel,
     SourceLogicTree, 
     SourceLogicTreeComponent,
-    SourceLogicTreeWeightedComponent
+    SourceLogicTreeWeightedComponent,
+    GMCMLogicTree
 )
 
 class SeismicHazardModelAdmin(admin.ModelAdmin):
-    fields = ["version", "notes", "source_logic_tree" ]
+    fields = ["version", "notes", "source_logic_tree", "gmcm_logic_tree" ]
 
 class SourceLogicTreeAdmin(admin.ModelAdmin):
+    fields = ["version", "notes"]
+
+class GMCMLogicTreeAdmin(admin.ModelAdmin):
     fields = ["version", "notes"]
 
 class SourceLogicTreeComponentAdmin(admin.ModelAdmin):
@@ -21,5 +25,6 @@ class SourceLogicTreeWeightedComponentAdmin(admin.ModelAdmin):
 
 admin.site.register(SeismicHazardModel, SeismicHazardModelAdmin)
 admin.site.register(SourceLogicTree, SourceLogicTreeAdmin)
+admin.site.register(GMCMLogicTree, GMCMLogicTreeAdmin)
 admin.site.register(SourceLogicTreeComponent, SourceLogicTreeComponentAdmin)
 admin.site.register(SourceLogicTreeWeightedComponent, SourceLogicTreeWeightedComponentAdmin)

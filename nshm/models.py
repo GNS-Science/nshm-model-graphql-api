@@ -13,15 +13,6 @@ class SourceLogicTree(models.Model):
     def __str__(self):
         return self.version
 
-class SeismicHazardModel(models.Model):
-    version = models.CharField(max_length=30)
-    notes = models.TextField(null=True, blank=True)
-    source_logic_tree = models.ForeignKey(
-        SourceLogicTree, related_name='seismic_hazard_models',null=True, blank=True, on_delete=models.SET_NULL)
-    
-    def __str__(self):
-        return self.version
-
 
 class SourceLogicTreeComponent(models.Model):
     tag = models.CharField(max_length=50)
@@ -34,6 +25,7 @@ class SourceLogicTreeComponent(models.Model):
     def __str__(self):
         return f"{self.tag} {self.tectonic_region}"
 
+
 class SourceLogicTreeWeightedComponent(models.Model):
     weight = models.FloatField()
     source_logic_tree = models.ForeignKey(
@@ -42,3 +34,24 @@ class SourceLogicTreeWeightedComponent(models.Model):
 
     def __str__(self):
         return f"{self.source_logic_tree_component.tag} {self.weight}"
+    
+
+class GMCMLogicTree(models.Model):
+    version = models.CharField(max_length=30)
+    notes = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return self.version
+    
+class SeismicHazardModel(models.Model):
+    version = models.CharField(max_length=30)
+    notes = models.TextField(null=True, blank=True)
+    source_logic_tree = models.ForeignKey(
+        SourceLogicTree, related_name='seismic_hazard_models',null=True, blank=True, on_delete=models.SET_NULL)
+    
+    gmcm_logic_tree = models.ForeignKey(
+        GMCMLogicTree, related_name='seismic_hazard_models',null=True, blank=True, on_delete=models.SET_NULL)
+    
+    def __str__(self):
+        return self.version
+

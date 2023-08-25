@@ -37,6 +37,16 @@ class SourceLogicTreeWeightedComponent(DjangoObjectType):
         model = models.SourceLogicTreeWeightedComponent
         interfaces = (relay.Node, )
 
+class GMCM_LogicTree(DjangoObjectType):
+    """Ground Motion Characteristic Model (GMCM) Logic Tree
+    
+    A list of GMMs by tectonic region, with weights. Tectonic region weights must sum to 1.
+    """
+    class Meta:
+        model = models.GMCMLogicTree
+        filter_fields = ['version', 'notes']
+        interfaces = (relay.Node, )
+    
 class Query(ObjectType):
     seismic_hazard_model = relay.Node.Field(SeismicHazardModel)
     all_seismic_hazard_models = DjangoFilterConnectionField(SeismicHazardModel)
@@ -46,5 +56,8 @@ class Query(ObjectType):
 
     source_logic_tree_component = relay.Node.Field(SourceLogicTreeComponent)
     all_source_logic_tree_components = DjangoFilterConnectionField(SourceLogicTreeComponent)
+
+    gmcm_logic_tree = relay.Node.Field(GMCM_LogicTree)
+    all_gmcm_logic_trees = DjangoFilterConnectionField(GMCM_LogicTree)
 
     # source_logic_tree_weighted_component = relay.Node.Field(SourceLogicTreeWeightedComponent)
