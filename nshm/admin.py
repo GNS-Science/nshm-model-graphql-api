@@ -13,6 +13,7 @@ from .models import (
 
 class SeismicHazardModelAdmin(admin.ModelAdmin):
     fields = ["version", "notes", "source_logic_tree", "gmcm_logic_tree"]
+    list_display = ["version", "notes", "source_logic_tree", "gmcm_logic_tree"]
 
 class SourceLogicTreeAdmin(admin.ModelAdmin):
     fields = ["version", "notes"]
@@ -22,6 +23,8 @@ class GMCMLogicTreeAdmin(admin.ModelAdmin):
 
 class SourceLogicTreeComponentAdmin(admin.ModelAdmin):
     fields = ["tag", "notes", "inversion_toshi_id", "background_toshi_id", "tectonic_region", "group" ]
+    list_display = ["tag", "notes", "tectonic_region", "group" ]
+    list_filter = ["tectonic_region", "group" ]
 
 class SourceLogicTreeWeightedComponentAdmin(admin.ModelAdmin):
     fields = ["weight", "source_logic_tree", "source_logic_tree_component"]
@@ -31,6 +34,8 @@ class LocationListAdmin(admin.ModelAdmin):
 
 class HazardSolutionAdmin(admin.ModelAdmin):
     fields = ["solution_id", "created", "vs30", "notes", "location_lists", "slt_components"]
+    list_display = ["solution_id", "created", "vs30", "notes"]
+    list_filter = ["vs30", "created"]
 
 class OpenquakeHazardTaskAdmin(admin.ModelAdmin):
     fields = ["general_task_id", "date", "notes", "config_info", "part_of"]

@@ -79,7 +79,6 @@ class HazardSolution(models.Model):
 class OpenquakeHazardTask(models.Model):
     general_task_id = models.CharField(max_length=50, null=False)
     date = models.DateField(auto_now=False, auto_now_add=False)
-    # task_type = models.CharField(max_length=15, null=False)
     config_info = models.TextField(null=True, blank=True)
     notes = models.TextField(null=True, blank=True)
     part_of = models.ForeignKey(
