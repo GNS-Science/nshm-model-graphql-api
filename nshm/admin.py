@@ -7,11 +7,12 @@ from .models import (
     SourceLogicTreeWeightedComponent,
     GMCMLogicTree,
     LocationList,
-    HazardSolution
+    HazardSolution,
+    OpenquakeHazardTask
 )
 
 class SeismicHazardModelAdmin(admin.ModelAdmin):
-    fields = ["version", "notes", "source_logic_tree", "gmcm_logic_tree" ]
+    fields = ["version", "notes", "source_logic_tree", "gmcm_logic_tree"]
 
 class SourceLogicTreeAdmin(admin.ModelAdmin):
     fields = ["version", "notes"]
@@ -31,6 +32,11 @@ class LocationListAdmin(admin.ModelAdmin):
 class HazardSolutionAdmin(admin.ModelAdmin):
     fields = ["solution_id", "created", "vs30", "notes", "location_lists", "slt_components"]
 
+class OpenquakeHazardTaskAdmin(admin.ModelAdmin):
+    fields = ["general_task_id", "date", "notes", "config_info", "part_of"]
+    list_display = ("general_task_id", "date", "notes", "config_info", "part_of")
+    list_filter = ("date", "part_of")
+
 admin.site.register(SeismicHazardModel, SeismicHazardModelAdmin)
 admin.site.register(SourceLogicTree, SourceLogicTreeAdmin)
 admin.site.register(GMCMLogicTree, GMCMLogicTreeAdmin)
@@ -39,3 +45,4 @@ admin.site.register(SourceLogicTreeWeightedComponent, SourceLogicTreeWeightedCom
 
 admin.site.register(LocationList, LocationListAdmin)
 admin.site.register(HazardSolution, HazardSolutionAdmin)
+admin.site.register(OpenquakeHazardTask, OpenquakeHazardTaskAdmin)

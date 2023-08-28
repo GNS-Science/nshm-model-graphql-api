@@ -18,7 +18,7 @@ class SourceLogicTreeComponent(models.Model):
     notes = models.TextField(null=True, blank=True)    
     inversion_toshi_id = models.CharField(max_length=50, null=False)
     background_toshi_id = models.CharField(max_length=50, null=True)
-    tectonic_region = models.CharField(choices=TECTONIC_REGIONS.choices, null=False, max_length=10)
+    tectonic_region =    models.CharField(choices=TECTONIC_REGIONS.choices, null=False, max_length=10)
     group = models.CharField(choices=SLT_GROUP.choices, null=False, max_length=10)
 
     def __str__(self):
@@ -42,6 +42,7 @@ class GMCMLogicTree(models.Model):
     def __str__(self):
         return self.version
     
+
 class SeismicHazardModel(models.Model):
     version = models.CharField(max_length=30)
     notes = models.TextField(null=True, blank=True)
@@ -62,6 +63,7 @@ class LocationList(models.Model):
     def __str__(self):
         return self.list_id
     
+
 class HazardSolution(models.Model):
     solution_id = models.CharField(max_length=50, null=False)
     created = models.DateTimeField(auto_now=False, auto_now_add=False)
@@ -72,3 +74,16 @@ class HazardSolution(models.Model):
     slt_components = models.ManyToManyField(
         SourceLogicTreeWeightedComponent,
         related_name='hazard_solutions')
+    
+
+class OpenquakeHazardTask(models.Model):
+    general_task_id = models.CharField(max_length=50, null=False)
+    date = models.DateField(auto_now=False, auto_now_add=False)
+    # task_type = models.CharField(max_length=15, null=False)
+    config_info = models.TextField(null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+    part_of = models.ForeignKey(
+        SeismicHazardModel, related_name='hazard_tasks',null=True, blank=True, on_delete=models.SET_NULL)    
+    
+    def __str__(self):
+        return self.general_task_id    
