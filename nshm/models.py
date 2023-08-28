@@ -13,7 +13,6 @@ class SourceLogicTree(models.Model):
     def __str__(self):
         return self.version
 
-
 class SourceLogicTreeComponent(models.Model):
     tag = models.CharField(max_length=50)
     notes = models.TextField(null=True, blank=True)    
@@ -55,3 +54,21 @@ class SeismicHazardModel(models.Model):
     def __str__(self):
         return self.version
 
+class LocationList(models.Model):
+    list_id = models.CharField(max_length=10)
+    notes = models.TextField(null=True, blank=True)    
+    length = models.SmallIntegerField()
+
+    def __str__(self):
+        return self.list_id
+    
+class HazardSolution(models.Model):
+    solution_id = models.CharField(max_length=50, null=False)
+    created = models.DateTimeField(auto_now=False, auto_now_add=False)
+    vs30 = models.SmallIntegerField()
+    notes = models.TextField(null=True, blank=True)
+    location_lists = models.ManyToManyField(
+        LocationList, related_name='hazard_solutions')
+    slt_components = models.ManyToManyField(
+        SourceLogicTreeWeightedComponent,
+        related_name='hazard_solutions')

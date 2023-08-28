@@ -5,7 +5,9 @@ from .models import (
     SourceLogicTree, 
     SourceLogicTreeComponent,
     SourceLogicTreeWeightedComponent,
-    GMCMLogicTree
+    GMCMLogicTree,
+    LocationList,
+    HazardSolution
 )
 
 class SeismicHazardModelAdmin(admin.ModelAdmin):
@@ -23,8 +25,17 @@ class SourceLogicTreeComponentAdmin(admin.ModelAdmin):
 class SourceLogicTreeWeightedComponentAdmin(admin.ModelAdmin):
     fields = ["weight", "source_logic_tree", "source_logic_tree_component"]
 
+class LocationListAdmin(admin.ModelAdmin):
+    fields = ["list_id", "notes", "length"]
+
+class HazardSolutionAdmin(admin.ModelAdmin):
+    fields = ["solution_id", "created", "vs30", "notes", "location_lists", "slt_components"]
+
 admin.site.register(SeismicHazardModel, SeismicHazardModelAdmin)
 admin.site.register(SourceLogicTree, SourceLogicTreeAdmin)
 admin.site.register(GMCMLogicTree, GMCMLogicTreeAdmin)
 admin.site.register(SourceLogicTreeComponent, SourceLogicTreeComponentAdmin)
 admin.site.register(SourceLogicTreeWeightedComponent, SourceLogicTreeWeightedComponentAdmin)
+
+admin.site.register(LocationList, LocationListAdmin)
+admin.site.register(HazardSolution, HazardSolutionAdmin)
