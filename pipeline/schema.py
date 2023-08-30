@@ -9,7 +9,7 @@ from pipeline import models
 class OpenquakeHazardTask(DjangoObjectType):
     class Meta:
         model = models.OpenquakeHazardTask
-        filter_fields = ['general_task_id', 'part_of']
+        filter_fields = ['general_task_id', 'part_of__version']
         interfaces = (relay.Node, )
 
 class Query(ObjectType):

@@ -25,3 +25,23 @@ poetry run python manage.py graph_models -o nshm_model.png nshm pipeline
 poetry run python manage.py dumpdata nshm.OpenquakeHazardTask -o pipeline/fixtures/oht.json --indent=2
 poetry run python manage.py loaddata pipeline/fixtures/oht.json
 ```
+
+### update static files
+
+These are just the static components for admin and graphiql
+
+```
+poetry run python manage.py collectstatic -c
+```
+
+### run server options
+
+```
+poetry run python manage.py runserver
+poetry run python manage.py runserver_plus
+```
+
+```
+poetry shell
+npx sls wsgi serve
+```
