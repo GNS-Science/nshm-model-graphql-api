@@ -1,6 +1,12 @@
 ref: https://docs.graphene-python.org/projects/django/en/latest/tutorial-relay/
 
 
+## the Sqlite3 on lambda issue
+
+This project is a good candidate for using a sqlite3 database, especially in the exploratory, POC stages. 
+
+But we had to solve some compatablity issues to get this working on AWS lambda . [See this guide](./SQLITE_CUSTOM_LAMBDA_BUILD.md) for more info.
+
 ## Some Useful commands
 
 ### build an ERM model

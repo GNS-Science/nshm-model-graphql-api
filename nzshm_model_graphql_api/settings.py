@@ -11,6 +11,12 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+# import sqlite3
+# if sqlite3.sqlite_version < '3.44': # local binary _ssqlite3.so is '3.44', but 3.37 also works fine
+#     f = Path("_sqlite3.so")
+#     print("checking for _sqlite.so with path: %s is found: %s" % (str(f.absolute()), f.exists()))
+#     raise RuntimeError("Found sqllite version %s, which is unsupported by django")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,7 +28,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-*6mdqrx8xj5fkb4d@iy3yc#6u2@3hnsh1tc_a&p9os6z%o6xlg'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = bool(os.getenv('DEBUG'))
 
 ALLOWED_HOSTS = ["5qwlrdxd4a.execute-api.ap-southeast-2.amazonaws.com", "localhost"]
 
