@@ -6,14 +6,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('nshm', '0003_sourcelogictreecomponent_and_more'),
+        ("nshm", "0003_sourcelogictreecomponent_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='sourcelogictreecomponent',
-            name='tectonic_region',
-            field=models.CharField(choices=[('CRUSTAL', 'Crustal'), ('SUBDUCTION', 'Subduction'), ('INTERFACE', 'Interface')], default='CRUSTAL', max_length=10),
+            model_name="sourcelogictreecomponent",
+            name="tectonic_region",
+            field=models.CharField(
+                choices=[
+                    ("CRUSTAL", "Crustal"),
+                    ("SUBDUCTION", "Subduction"),
+                    ("INTERFACE", "Interface"),
+                ],
+                default="CRUSTAL",
+                max_length=10,
+            ),
             preserve_default=False,
         ),
     ]

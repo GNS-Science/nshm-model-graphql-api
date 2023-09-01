@@ -6,14 +6,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('nshm', '0006_alter_seismichazardmodel_source_logic_tree'),
+        ("nshm", "0006_alter_seismichazardmodel_source_logic_tree"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='sourcelogictreecomponent',
-            name='group',
-            field=models.CharField(choices=[('Slab', 'Slab'), ('Hikurangi', 'Hik'), ('Puysegur', 'Puy'), ('Crustal', 'Cru')], default='HIK', max_length=10),
+            model_name="sourcelogictreecomponent",
+            name="group",
+            field=models.CharField(
+                choices=[
+                    ("Slab", "Slab"),
+                    ("Hikurangi", "Hik"),
+                    ("Puysegur", "Puy"),
+                    ("Crustal", "Cru"),
+                ],
+                default="HIK",
+                max_length=10,
+            ),
             preserve_default=False,
         ),
     ]

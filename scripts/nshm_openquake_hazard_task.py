@@ -25,11 +25,17 @@
 # and the script is at ./some_folder/some_script.py
 # you must make sure ./some_folder/__init__.py exists
 # and run  ./manage.py runscript some_folder.some_script
-import os, sys
+import os
+import sys
 from django.db import transaction
+# from decimal import Decimal
+# from django.contrib.contenttypes.models import ContentType
+
+import csv
+import pathlib
+
 
 class BasicImportHelper:
-
     def pre_import(self):
         pass
 
@@ -48,7 +54,15 @@ class BasicImportHelper:
         the_obj = current_object.__class__.objects.get(**search_data)
         return the_obj
 
-    def locate_object(self, original_class, original_pk_name, the_class, pk_name, pk_value, obj_content):
+    def locate_object(
+        self,
+        original_class,
+        original_pk_name,
+        the_class,
+        pk_name,
+        pk_value,
+        obj_content,
+    ):
         # You may change this function to do specific lookup for specific objects
         #
         # original_class class of the django orm's object that needs to be located
@@ -72,17 +86,16 @@ class BasicImportHelper:
         #   if the_class == StaffGroup:
         #       pk_value=8
 
-        search_data = { pk_name: pk_value }
+        search_data = {pk_name: pk_value}
         the_obj = the_class.objects.get(**search_data)
-        #print(the_obj)
+        # print(the_obj)
         return the_obj
-
 
     def save_or_locate(self, the_obj):
         # Change this if you want to locate the object in the database
         try:
             the_obj.save()
-        except:
+        except:  # noqa
             print("---------------")
             print("Error saving the following object:")
             print(the_obj.__class__)
@@ -100,64 +113,62 @@ class BasicImportHelper:
 importer = None
 try:
     import import_helper
+
     # We need this so ImportHelper can extend BasicImportHelper, although import_helper.py
     # has no knowlodge of this class
-    importer = type("DynamicImportHelper", (import_helper.ImportHelper, BasicImportHelper ) , {} )()
+    importer = type(
+        "DynamicImportHelper", (import_helper.ImportHelper, BasicImportHelper), {}
+    )()
 except ImportError as e:
     # From Python 3.3 we can check e.name - string match is for backward compatibility.
-    if 'import_helper' in str(e):
+    if "import_helper" in str(e):
         importer = BasicImportHelper()
     else:
         raise
 
-import datetime
-from decimal import Decimal
-from django.contrib.contenttypes.models import ContentType
-
-import csv
-import pathlib
 try:
     import dateutil.parser
-    from dateutil.tz import tzoffset
+    # from dateutil.tz import tzoffset
 except ImportError:
     print("Please install python-dateutil")
     sys.exit(os.EX_USAGE)
+
 
 def run():
     importer.pre_import()
     importer.run_import(import_data)
     importer.post_import()
 
+
 def import_data():
     # Initial Imports
-
     # Processing model: nshm.models.OpenquakeHazardTask
-
     from nshm.models import OpenquakeHazardTask, SeismicHazardModel
 
     p = pathlib.Path("NZSHM22 Beavan Job Control - OQ Hazard.csv")
     assert p.exists()
-    with open(p, 'r') as csv_file:
+    with open(p, "r") as csv_file:
 
-        for itm in csv.DictReader(csv_file):         
-            if int(itm['Invalid']) == 1:
+        for itm in csv.DictReader(csv_file):
+            if int(itm["Invalid"]) == 1:
                 continue
-            
+
             obj = OpenquakeHazardTask(
-                date = dateutil.parser.parse(itm['Date']),
-                general_task_id = itm['GenTask'],
-                config_info = itm['Runzi Config'],
-                notes = itm['Notes'],
+                date=dateutil.parser.parse(itm["Date"]),
+                general_task_id=itm["GenTask"],
+                config_info=itm["Runzi Config"],
+                notes=itm["Notes"],
             )
             # print('OBJ', obj, itm['part_of'])
-            if itm['part_of']:
-                found = list(SeismicHazardModel.objects.filter(version__exact=itm['part_of']))
+            if itm["part_of"]:
+                found = list(
+                    SeismicHazardModel.objects.filter(version__exact=itm["part_of"])
+                )
                 if found:
                     shm = found[0]
                 else:
-                    shm = SeismicHazardModel(version=itm['part_of'])
+                    shm = SeismicHazardModel(version=itm["part_of"])
                     shm.save()
 
                 obj.part_of = shm
             obj.save()
-

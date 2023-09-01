@@ -6,12 +6,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('nshm', '0009_gmcm_logictree_seismichazardmodel_gmcm_logic_tree'),
+        ("nshm", "0009_gmcm_logictree_seismichazardmodel_gmcm_logic_tree"),
     ]
 
     operations = [
         migrations.RenameModel(
-            old_name='GMCM_LogicTree',
-            new_name='GMCMLogicTree',
+            old_name="GMCM_LogicTree",
+            new_name="GMCMLogicTree",
         ),
     ]
