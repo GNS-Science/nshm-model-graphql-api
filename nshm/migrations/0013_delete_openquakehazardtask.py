@@ -6,11 +6,11 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('nshm', '0012_openquakehazardtask'),
+        ("nshm", "0012_openquakehazardtask"),
     ]
 
     operations = [
         migrations.DeleteModel(
-            name='OpenquakeHazardTask',
+            name="OpenquakeHazardTask",
         ),
     ]

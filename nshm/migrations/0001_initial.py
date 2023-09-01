@@ -7,24 +7,39 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='SeismicHazardModel',
+            name="SeismicHazardModel",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('version', models.CharField(max_length=30)),
-                ('notes', models.TextField()),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("version", models.CharField(max_length=30)),
+                ("notes", models.TextField()),
             ],
         ),
         migrations.CreateModel(
-            name='SourceLogicTree',
+            name="SourceLogicTree",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('version', models.CharField(max_length=30)),
-                ('notes', models.TextField()),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("version", models.CharField(max_length=30)),
+                ("notes", models.TextField()),
             ],
         ),
     ]
