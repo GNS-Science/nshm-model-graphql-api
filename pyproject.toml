@@ -38,6 +38,7 @@ toml = {version = "^0.10.2", optional = true}
 bump2version = {version = "^1.0.1"}
 mypy = "^1.5.1"
 types-setuptools = "^68.1.0.1"
+pytest-django = "^4.5.2"
 
 [tool.poetry.extras]
 test = [
