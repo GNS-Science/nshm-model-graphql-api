@@ -1,6 +1,12 @@
 ref: https://docs.graphene-python.org/projects/django/en/latest/tutorial-relay/
 
 
+## the Sqlite3 on lambda issue
+
+This project is a good candidate for using a sqlite3 database, especially in the exploratory, POC stages. 
+
+But we had to solve some compatablity issues to get this working on AWS lambda . [See this guide](./SQLITE_CUSTOM_LAMBDA_BUILD.md) for more info.
+
 ## Some Useful commands
 
 ### build an ERM model
@@ -24,4 +30,24 @@ poetry run python manage.py graph_models -o nshm_model.png nshm pipeline
 ```
 poetry run python manage.py dumpdata nshm.OpenquakeHazardTask -o pipeline/fixtures/oht.json --indent=2
 poetry run python manage.py loaddata pipeline/fixtures/oht.json
+```
+
+### update static files
+
+These are just the static components for admin and graphiql
+
+```
+poetry run python manage.py collectstatic -c
+```
+
+### run server options
+
+```
+poetry run python manage.py runserver
+poetry run python manage.py runserver_plus
+```
+
+```
+poetry shell
+npx sls wsgi serve
 ```
