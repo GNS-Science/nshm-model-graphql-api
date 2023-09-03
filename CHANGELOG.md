@@ -1,5 +1,8 @@
 # Changelog
 
+## [0.1.3] - 2023-09-04
+## Added
+ - new about and version resolvers
 
 ## [0.1.2] - 2023-09-04
 ## Changed

@@ -596,13 +596,13 @@ files = [
 
 [[package]]
 name = "pip"
-version = "20.3.4"
+version = "23.2.1"
 description = "The PyPA recommended tool for installing Python packages."
-optional = true
-python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*"
+optional = false
+python-versions = ">=3.7"
 files = [
-    {file = "pip-20.3.4-py2.py3-none-any.whl", hash = "sha256:217ae5161a0e08c0fb873858806e3478c9775caffce5168b50ec885e358c199d"},
-    {file = "pip-20.3.4.tar.gz", hash = "sha256:6773934e5f5fc3eaa8c5a44949b5b924fc122daa0a8aa9f80c835b4ca2a543fc"},
+    {file = "pip-23.2.1-py3-none-any.whl", hash = "sha256:7ccf472345f20d35bdc9d1841ff5f313260c2c33fe417f48c30ac46cccabf5be"},
+    {file = "pip-23.2.1.tar.gz", hash = "sha256:fb0bd5435b3200c602b5bf61d2d43c2f13c02e29c1707567ae7fbc514eb9faf2"},
 ]
 
 [[package]]
@@ -1082,4 +1082,4 @@ test = []
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "1d8080c1ac565351a2e7372d44979e2191f2e252094ce5411733c5175840c491"
+content-hash = "b3f53640a2f4d78e18dbf9a20784378e06c648d882a1fcca4cc37cb19e850925"
