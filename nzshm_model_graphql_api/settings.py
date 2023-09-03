@@ -137,7 +137,19 @@ GRAPH_MODELS = {
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = "static/"
+"""
+The following resolves issue https://github.com/GNS-Science/nshm-model-graphql-api/issues/10
+ providing a static prefix that works both locally and on AWS. Notes:
+   - Using django `manage.py runserver`, DEPLOYMENT_STAGE variable is not set.
+   - using `sls wsgi serve`, DEPLOYMENT_STAGE is set to `LOCAL` in serverless.yml
+   - on AWS the DEPLOYMENT_STAGE must be DEV, TEST or PROD.
+
+Also, for some reason, we get the DEPLOYMENT_STAGE prefix set automatically by django if DEBUG==TRUE.
+"""
+DEPLOYMENT_STAGE = os.getenv("DEPLOYMENT_STAGE", "LOCAL").upper()
+STATIC_URL = (
+    "static/" if DEPLOYMENT_STAGE == "LOCAL" or DEBUG else f"{DEPLOYMENT_STAGE}/static/"
+)
 STATIC_ROOT = str(BASE_DIR / "staticfiles")
 
 # using whitenoise to simplify static resources
@@ -151,4 +163,4 @@ STORAGES = {
 
 SECURE_REFERRER_POLICY = "origin"
 SECURE_CONTENT_TYPE_NOSNIFF = False
-WHITENOISE_STATIC_PREFIX = "static/"
+WHITENOISE_STATIC_PREFIX = "/static/"
