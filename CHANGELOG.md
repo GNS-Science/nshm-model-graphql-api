@@ -1,5 +1,10 @@
 # Changelog
 
+
+## [0.1.2] - 2023-09-04
+## Changed
+ - configure static_url correctly for both local & AWS
+
 ## [0.1.1] - 2023-09-01
 ### Added
  - pytest, tox, etc
