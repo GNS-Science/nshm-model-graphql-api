@@ -5,27 +5,28 @@ from django_elasticsearch_dsl.registries import registry
 
 from nshm import models
 
-class BaseDocumentIndex(Document):
+@registry.register_document
+class SeismicHazardModelDocument(Document):
+
     class Index:
-        name = 'nshm_model'
+        name = 'seismic_hazard_models'
         # See Elasticsearch Indices API reference for available settings
         settings = {'number_of_shards': 1,
                     'number_of_replicas': 0}
-
-@registry.register_document
-class SeismicHazardModelDocument(BaseDocumentIndex):
+            
     class Django:
         model = models.SeismicHazardModel # The model associated with this Document
-
-        # The fields of the model you want to be indexed in Elasticsearch
         fields = [
             "version",
             "notes",
         ]
 
 @registry.register_document
-class HazardSolutionDocument(BaseDocumentIndex):
-
+class HazardSolutionDocument(Document):
+    class Index:
+        name = 'hazard_solutions'
+        settings = {'number_of_shards': 1,
+                    'number_of_replicas': 0}
     class Django:
         model = models.HazardSolution # The model associated with this Document
         fields = [
@@ -33,6 +34,4 @@ class HazardSolutionDocument(BaseDocumentIndex):
             "created",
             "vs30",
             "notes",
-            # "location_lists",
-            # "slt_components",
         ]

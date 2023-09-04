@@ -46,12 +46,15 @@ class Query(nshm.schema.Query, pipeline.schema.Query, graphene.ObjectType):
         search_term = kwargs.get('search_term')
         print(search_term)
         client = Elasticsearch()
-        s = elasticsearch_dsl.Search(index='nshm_model').using(client)
-        search_result = list(s.query("match", version=search_term))
+        s = elasticsearch_dsl.Search().using(client)
+        q = elasticsearch_dsl.Q("multi_match", query=search_term)
+        search_result = list(s.query(q))
         for sr in search_result:
-            print(sr)
+            print(sr, sr.notes)
+            print(sr.meta, sr.meta.doc_type, sr.meta.id)            
+            print(dir(sr))
 
         # db_metrics.put_duration(__name__, 'resolve_search' , dt.utcnow()-t0)
-        return Search(ok=True, search_result=search_result)
+        return Search(ok=True, search_result=[])
 
 schema = graphene.Schema(query=Query)
