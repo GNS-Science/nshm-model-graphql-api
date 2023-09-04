@@ -16,6 +16,8 @@ python-dateutil = "^2.8.2"
 werkzeug = "^2.3.7"
 whitenoise = "^6.5.0"
 django-extensions = "^3.2.3"
+django-elasticsearch-dsl = ">=6.0.0,<7.0.0"
+elasticsearch-dsl = ">=6.0.0,<7.0.0"
 
 [tool.poetry.group.dev.dependencies]
 pyparsing = "^3.1.1"

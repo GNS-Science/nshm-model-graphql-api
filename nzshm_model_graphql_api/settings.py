@@ -13,11 +13,12 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import os
 from pathlib import Path
 
-# import sqlite3
-# if sqlite3.sqlite_version < '3.44': # local binary _ssqlite3.so is '3.44', but 3.37 also works fine
-#     f = Path("_sqlite3.so")
-#     print("checking for _sqlite.so with path: %s is found: %s" % (str(f.absolute()), f.exists()))
-#     raise RuntimeError("Found sqllite version %s, which is unsupported by django")
+## Monkey path to support older ES 6.8.0
+#  see https://stackoverflow.com/a/70833150
+import django
+from django.utils.encoding import force_str
+django.utils.encoding.force_text = force_str
+## end monkey patch
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -47,6 +48,7 @@ INSTALLED_APPS = [
     "pipeline",
     "graphene_django",
     "django_extensions",
+    "django_elasticsearch_dsl"
 ]
 
 MIDDLEWARE = [
@@ -164,3 +166,10 @@ STORAGES = {
 SECURE_REFERRER_POLICY = "origin"
 SECURE_CONTENT_TYPE_NOSNIFF = False
 WHITENOISE_STATIC_PREFIX = "/static/"
+
+#ref https://django-elasticsearch-dsl.readthedocs.io/en/latest/quickstart.html
+ELASTICSEARCH_DSL={
+    'default': {
+        'hosts': 'localhost:9200'
+    },
+}

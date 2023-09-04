@@ -82,8 +82,7 @@ class SeismicHazardModel(models.Model):
 
     def __str__(self):
         return self.version
-
-
+    
 class LocationList(models.Model):
     list_id = models.CharField(max_length=10)
     notes = models.TextField(null=True, blank=True)
