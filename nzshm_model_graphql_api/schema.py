@@ -6,9 +6,8 @@ import pipeline.schema
 from nzshm_model_graphql_api import __version__
 
 from nshm.schema import SeismicHazardModel #, HazardSolution
-from elasticsearch import Elasticsearch
+from nzshm_model_graphql_api import settings
 import elasticsearch_dsl
-
 
 class SearchResult(graphene.Union):
     class Meta:
@@ -45,8 +44,9 @@ class Query(nshm.schema.Query, pipeline.schema.Query, graphene.ObjectType):
 
         search_term = kwargs.get('search_term')
         print(search_term)
-        client = Elasticsearch()
-        s = elasticsearch_dsl.Search().using(client)
+
+        client = elasticsearch_dsl.connections.get_connection(settings.ELASTICSEARCH_DSL['default'])
+        s = elasticsearch_dsl.Search(client).using(client)
         q = elasticsearch_dsl.Q("multi_match", query=search_term)
         search_result = list(s.query(q))
         for sr in search_result:

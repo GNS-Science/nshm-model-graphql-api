@@ -20,6 +20,14 @@ from django.utils.encoding import force_str
 django.utils.encoding.force_text = force_str
 ## end monkey patch
 
+
+### ES
+from elasticsearch_dsl import connections
+from elasticsearch import Elasticsearch, RequestsHttpConnection
+from requests_aws4auth import AWS4Auth
+import boto3
+### end ES
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -48,7 +56,8 @@ INSTALLED_APPS = [
     "pipeline",
     "graphene_django",
     "django_extensions",
-    "django_elasticsearch_dsl"
+    "django_elasticsearch_dsl",
+
 ]
 
 MIDDLEWARE = [
@@ -167,9 +176,42 @@ SECURE_REFERRER_POLICY = "origin"
 SECURE_CONTENT_TYPE_NOSNIFF = False
 WHITENOISE_STATIC_PREFIX = "/static/"
 
+
+
+
+# For example, my-test-domain.us-east-1.es.amazonaws.com
+# ES_HOST = 'https://search-nshm-model-opensearch-poc-fz3qmvqjus5clpyxgvfju3c4fq.ap-southeast-2.es.amazonaws.com' # OpenSearch
+ES_HOST = 'https://search-nshm-model-opensearch-es-fayxiqeijwlgiuo6gdv6cjf7vy.ap-southeast-2.es.amazonaws.com' # Elastic 7.10
+
+ES_REGION = 'ap-southeast-2' # e.g. us-west-1
+IS_OFFLINE = None
+awsauth = None
+
+if not IS_OFFLINE:
+    credentials = boto3.Session().get_credentials()
+    awsauth = AWS4Auth(
+            credentials.access_key,
+            credentials.secret_key,
+            ES_REGION,
+            'es',
+            session_token=credentials.token) 
+
+client = Elasticsearch(
+    hosts=[ES_HOST],
+    http_auth=awsauth,
+    use_ssl=True,
+    verify_certs=True,
+    connection_class=RequestsHttpConnection
+)
+
 #ref https://django-elasticsearch-dsl.readthedocs.io/en/latest/quickstart.html
 ELASTICSEARCH_DSL={
-    'default': {
-        'hosts': 'localhost:9200'
-    },
+    # 'default': {
+    #     'hosts': 'localhost:9200'
+    # },
+    'default': client
 }
+
+# connections.remove_connection('default')
+connections.add_connection('default', client)
+# assert 0
