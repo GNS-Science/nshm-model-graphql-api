@@ -78,17 +78,17 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "boto3"
-version = "1.28.40"
+version = "1.28.41"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "boto3-1.28.40-py3-none-any.whl", hash = "sha256:bd7c760afb195eaeaab907dc6b2c21fa64ddbba3fed4a869e80d820ddbd6cc70"},
-    {file = "boto3-1.28.40.tar.gz", hash = "sha256:6ff9a5b815e106656596064d51c9b6ba97a307807baa5f89634384b7d3f7ecc6"},
+    {file = "boto3-1.28.41-py3-none-any.whl", hash = "sha256:47215c08645d1ea2568f9f358f25ffd4a42e08bce9af2fa1dd70c93c682dc880"},
+    {file = "boto3-1.28.41.tar.gz", hash = "sha256:2f655ab7e577c7543f9ee4e42d98641ccf02230d2f33695a6b39617b765401f5"},
 ]
 
 [package.dependencies]
-botocore = ">=1.31.40,<1.32.0"
+botocore = ">=1.31.41,<1.32.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.6.0,<0.7.0"
 
@@ -97,13 +97,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.31.40"
+version = "1.31.41"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "botocore-1.31.40-py3-none-any.whl", hash = "sha256:df766969f0d9ef9eda1a9c9946e0e173c10199f37a9e4c92861f11ddb5c9e702"},
-    {file = "botocore-1.31.40.tar.gz", hash = "sha256:ce22a82ef8674f49691477d09558992cc87e7331f65c6a5b0da897ab192240ca"},
+    {file = "botocore-1.31.41-py3-none-any.whl", hash = "sha256:c33a453328d361c089e6a8f9dd671a7b939288e539e6550c7030152e8162e906"},
+    {file = "botocore-1.31.41.tar.gz", hash = "sha256:4dad7c5a5e70940de54ebf8de3955450c1f092f43cacff8103819d1e7d5374fa"},
 ]
 
 [package.dependencies]
@@ -379,14 +379,16 @@ version = "7.3"
 description = "Wrapper around elasticsearch-dsl-py for django models"
 optional = false
 python-versions = "*"
-files = [
-    {file = "django-elasticsearch-dsl-7.3.tar.gz", hash = "sha256:084a790edf26131a7897d13a3b5c08a6e129ca145b2b3fcbc2b2d4e902a919c1"},
-    {file = "django_elasticsearch_dsl-7.3-py2.py3-none-any.whl", hash = "sha256:c1be1c6d25ee6e99dc246282a4f6de8cc0630d0f8d9863ed512c0baa9d21be94"},
-]
+files = []
+develop = false
 
 [package.dependencies]
 elasticsearch-dsl = ">=7.2.0,<8.0.0"
 six = "*"
+
+[package.source]
+type = "directory"
+url = "../django-elasticsearch-dsl"
 
 [[package]]
 name = "django-extensions"
@@ -854,7 +856,7 @@ files = [
 name = "pip"
 version = "23.2.1"
 description = "The PyPA recommended tool for installing Python packages."
-optional = true
+optional = false
 python-versions = ">=3.7"
 files = [
     {file = "pip-23.2.1-py3-none-any.whl", hash = "sha256:7ccf472345f20d35bdc9d1841ff5f313260c2c33fe417f48c30ac46cccabf5be"},
@@ -1193,7 +1195,7 @@ crt = ["botocore[crt] (>=1.20.29,<2.0a.0)"]
 name = "setuptools"
 version = "68.1.2"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
-optional = true
+optional = false
 python-versions = ">=3.8"
 files = [
     {file = "setuptools-68.1.2-py3-none-any.whl", hash = "sha256:3d8083eed2d13afc9426f227b24fd1659489ec107c0e86cec2ffdde5c92e790b"},
@@ -1435,4 +1437,4 @@ test = []
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "063986aad5ce6cfb2cd255e40527f26ddffd142d177d89940bf2ab27700a816b"
+content-hash = "78ff4d825c1195c78530de8167906d3376a0fcb42199246f3bc823107dffe8e7"

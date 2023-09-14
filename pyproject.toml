@@ -20,8 +20,10 @@ graphene-elastic = {path = "../graphene-elastic"}
 requests-aws4auth = "^1.2.3"
 boto3 = "^1.28.40"
 elasticsearch-dsl = "<7.4"
-django-elasticsearch-dsl = "^7.3"
 elasticsearch = "<7.14"
+setuptools = "^68.1.2"
+django-elasticsearch-dsl = {path = "../django-elasticsearch-dsl"}
+pip = "^23.2.1"
 
 [tool.poetry.group.dev.dependencies]
 pyparsing = "^3.1.1"
