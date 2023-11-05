@@ -1,5 +1,5 @@
 ref: https://docs.graphene-python.org/projects/django/en/latest/tutorial-relay/
-
+1
 
 ## the Sqlite3 on lambda issue
 
@@ -50,4 +50,19 @@ poetry run python manage.py runserver_plus
 ```
 poetry shell
 npx sls wsgi serve
+```
+
+### AWS OpenSearch integration
+
+Alert we use git@github.com:daily-science/django-elasticsearch-dsl.git fork for now. This should be PR'd onto the main project.
+
+This project now has ES settings and uses the above to maintain indexes as the django SQL db is maintained. 
+
+You can also maintain the indexes via new manage.py commaneds e.g:
+
+```
+DEBUG=1 poetry run python manage.py search_index --create
+DEBUG=1 poetry run python manage.py search_index --populate
+DEBUG=1 poetry run python manage.py search_index --rebuild
+DEBug=1 poetry run python manage.py search_index --help
 ```

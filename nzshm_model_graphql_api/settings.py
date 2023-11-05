@@ -13,11 +13,20 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import os
 from pathlib import Path
 
-# import sqlite3
-# if sqlite3.sqlite_version < '3.44': # local binary _ssqlite3.so is '3.44', but 3.37 also works fine
-#     f = Path("_sqlite3.so")
-#     print("checking for _sqlite.so with path: %s is found: %s" % (str(f.absolute()), f.exists()))
-#     raise RuntimeError("Found sqllite version %s, which is unsupported by django")
+## Monkey path to support older ES 6.8.0
+#  see https://stackoverflow.com/a/70833150
+import django
+from django.utils.encoding import force_str
+django.utils.encoding.force_text = force_str
+## end monkey patch
+
+
+### ES
+from elasticsearch_dsl import connections
+from elasticsearch import Elasticsearch, RequestsHttpConnection
+from requests_aws4auth import AWS4Auth
+import boto3
+### end ES
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -33,6 +42,8 @@ DEBUG = bool(os.getenv("DEBUG"))
 
 ALLOWED_HOSTS = ["5qwlrdxd4a.execute-api.ap-southeast-2.amazonaws.com", "localhost"]
 
+# make POST urls consistent with the other NSHM APIS
+APPEND_SLASH=False
 
 # Application definition
 
@@ -47,6 +58,8 @@ INSTALLED_APPS = [
     "pipeline",
     "graphene_django",
     "django_extensions",
+    "django_elasticsearch_dsl",
+
 ]
 
 MIDDLEWARE = [
@@ -54,7 +67,7 @@ MIDDLEWARE = [
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
+    # "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -137,7 +150,19 @@ GRAPH_MODELS = {
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = "static/"
+"""
+The following resolves issue https://github.com/GNS-Science/nshm-model-graphql-api/issues/10
+ providing a static prefix that works both locally and on AWS. Notes:
+   - Using django `manage.py runserver`, DEPLOYMENT_STAGE variable is not set.
+   - using `sls wsgi serve`, DEPLOYMENT_STAGE is set to `LOCAL` in serverless.yml
+   - on AWS the DEPLOYMENT_STAGE must be DEV, TEST or PROD.
+
+Also, for some reason, we get the DEPLOYMENT_STAGE prefix set automatically by django if DEBUG==TRUE.
+"""
+DEPLOYMENT_STAGE = os.getenv("DEPLOYMENT_STAGE", "LOCAL").upper()
+STATIC_URL = (
+    "static/" if DEPLOYMENT_STAGE == "LOCAL" or DEBUG else f"{DEPLOYMENT_STAGE}/static/"
+)
 STATIC_ROOT = str(BASE_DIR / "staticfiles")
 
 # using whitenoise to simplify static resources
@@ -151,4 +176,37 @@ STORAGES = {
 
 SECURE_REFERRER_POLICY = "origin"
 SECURE_CONTENT_TYPE_NOSNIFF = False
-WHITENOISE_STATIC_PREFIX = "static/"
+WHITENOISE_STATIC_PREFIX = "/static/"
+
+# For example, my-test-domain.us-east-1.es.amazonaws.com
+# ES_HOST = 'https://search-nshm-model-opensearch-poc-fz3qmvqjus5clpyxgvfju3c4fq.ap-southeast-2.es.amazonaws.com' # OpenSearch
+# ES_HOST = 'https://search-nshm-model-opensearch-es-fayxiqeijwlgiuo6gdv6cjf7vy.ap-southeast-2.es.amazonaws.com' # Elastic 7.10
+# ES_HOST = 'https://search-nzshm22-toshi-api-es-test-ybx3zlp6hz2shrytj2ns4zx6bm.ap-southeast-2.es.amazonaws.com' # TOSHI_TEST
+ES_HOST = "https://search-nzshm22-toshi-api-es-prod-cj4taqcgnefophpxzan55xeswa.ap-southeast-2.es.amazonaws.com" # TOSHI_PROD
+
+ES_REGION = 'ap-southeast-2' # e.g. us-west-1
+IS_OFFLINE = None
+awsauth = None
+
+if not IS_OFFLINE:
+    credentials = boto3.Session().get_credentials()
+    awsauth = AWS4Auth(
+            credentials.access_key,
+            credentials.secret_key,
+            ES_REGION,
+            'es',
+            session_token=credentials.token) 
+
+client = Elasticsearch(
+    hosts=[ES_HOST],
+    http_auth=awsauth,
+    use_ssl=True,
+    verify_certs=True,
+    connection_class=RequestsHttpConnection
+)
+
+#ref https://django-elasticsearch-dsl.readthedocs.io/en/latest/quickstart.html
+ELASTICSEARCH_DSL={
+    'default': client
+}
+connections.add_connection('default', client)
