@@ -28,9 +28,9 @@ class SeismicHazardModel(DjangoObjectType):
         interfaces = (relay.Node,)
 
 
-class SourceLogicTreeComponent(DjangoObjectType):
+class SourceLogicTreeSource(DjangoObjectType):
     class Meta:
-        model = models.SourceLogicTreeComponent
+        model = models.SourceLogicTreeSource
         interfaces = (relay.Node,)
         filter_fields = [
             "tag",
@@ -41,9 +41,9 @@ class SourceLogicTreeComponent(DjangoObjectType):
         ]
 
 
-class SourceLogicTreeWeightedComponent(DjangoObjectType):
+class SourceLogicTreeBranch(DjangoObjectType):
     class Meta:
-        model = models.SourceLogicTreeWeightedComponent
+        model = models.SourceLogicTreeBranch
         interfaces = (relay.Node,)
 
 
@@ -66,12 +66,12 @@ class Query(ObjectType):
     source_logic_tree = relay.Node.Field(SourceLogicTree)
     all_source_logic_trees = DjangoFilterConnectionField(SourceLogicTree)
 
-    source_logic_tree_component = relay.Node.Field(SourceLogicTreeComponent)
+    source_logic_tree_component = relay.Node.Field(SourceLogicTreeSource)
     all_source_logic_tree_components = DjangoFilterConnectionField(
-        SourceLogicTreeComponent
+        SourceLogicTreeSource
     )
 
     gmcm_logic_tree = relay.Node.Field(GMCM_LogicTree)
     all_gmcm_logic_trees = DjangoFilterConnectionField(GMCM_LogicTree)
 
-    # source_logic_tree_weighted_component = relay.Node.Field(SourceLogicTreeWeightedComponent)
+    # source_logic_tree_weighted_component = relay.Node.Field(SourceLogicTreeBranch)

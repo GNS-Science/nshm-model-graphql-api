@@ -181,8 +181,8 @@ WHITENOISE_STATIC_PREFIX = "/static/"
 # For example, my-test-domain.us-east-1.es.amazonaws.com
 # ES_HOST = 'https://search-nshm-model-opensearch-poc-fz3qmvqjus5clpyxgvfju3c4fq.ap-southeast-2.es.amazonaws.com' # OpenSearch
 # ES_HOST = 'https://search-nshm-model-opensearch-es-fayxiqeijwlgiuo6gdv6cjf7vy.ap-southeast-2.es.amazonaws.com' # Elastic 7.10
-# ES_HOST = 'https://search-nzshm22-toshi-api-es-test-ybx3zlp6hz2shrytj2ns4zx6bm.ap-southeast-2.es.amazonaws.com' # TOSHI_TEST
-ES_HOST = "https://search-nzshm22-toshi-api-es-prod-cj4taqcgnefophpxzan55xeswa.ap-southeast-2.es.amazonaws.com" # TOSHI_PROD
+ES_HOST = 'https://search-nzshm22-toshi-api-es-test-ybx3zlp6hz2shrytj2ns4zx6bm.ap-southeast-2.es.amazonaws.com' # TOSHI_TEST
+# ES_HOST = "https://search-nzshm22-toshi-api-es-prod-cj4taqcgnefophpxzan55xeswa.ap-southeast-2.es.amazonaws.com" # TOSHI_PROD
 
 ES_REGION = 'ap-southeast-2' # e.g. us-west-1
 IS_OFFLINE = None
