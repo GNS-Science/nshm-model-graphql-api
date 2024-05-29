@@ -2,7 +2,6 @@
 
 
 ## [0.2.0] 2024-05-30
-
  - Complete reset, no more django
  - all previous code is mothballed
 

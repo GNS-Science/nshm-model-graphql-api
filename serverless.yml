@@ -1,4 +1,4 @@
-service: nshm-model-graphql-api
+service: nzshm22-model-graphql-api
 
 plugins:
   - serverless-python-requirements
