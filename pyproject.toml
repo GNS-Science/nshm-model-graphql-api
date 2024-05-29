@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nzshm-model-graphql-api"
-version = "0.1.3"
+version = "0.2.0"
 description = ""
 authors = ["NSHM <nshm@gns.cri.nz>", "Chris Chamberlain <chrisbc@artisan.co.nz>"]
 license = "AGPL3"
@@ -22,6 +22,7 @@ pip  = { version = "^23.2.1", optional = true}
 
 bump2version = {version = "^1.0.1"}
 mypy = "^1.5.1"
+nzshm-model = {git = "https://github.com/GNS-Science/nzshm-model", rev = "pre-release"}
 
 [tool.poetry.extras]
 test = [
@@ -34,7 +35,7 @@ test = [
     "pytest-cov"
     ]
 
-dev = ["tox", "pre-commit", "virtualenv", "pip", "twine", "toml", "bump2version"]
+dev = ["tox", "virtualenv", "pip", "mypy", "isort", "black", "pytest", "flake8", "bump2version"]
 
 [build-system]
 requires = ["poetry-core"]
