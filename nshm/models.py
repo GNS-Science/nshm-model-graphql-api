@@ -20,7 +20,7 @@ class SourceLogicTree(models.Model):
         return self.version
 
 
-class SourceLogicTreeComponent(models.Model):
+class SourceLogicTreeSource(models.Model):
     tag = models.CharField(max_length=50)
     notes = models.TextField(null=True, blank=True)
     inversion_toshi_id = models.CharField(max_length=50, null=False)
@@ -34,7 +34,7 @@ class SourceLogicTreeComponent(models.Model):
         return f"{self.tag} {self.tectonic_region}"
 
 
-class SourceLogicTreeWeightedComponent(models.Model):
+class SourceLogicTreeBranch(models.Model):
     weight = models.FloatField()
     source_logic_tree = models.ForeignKey(
         SourceLogicTree,
@@ -43,7 +43,7 @@ class SourceLogicTreeWeightedComponent(models.Model):
         on_delete=models.CASCADE,
     )
     source_logic_tree_component = models.ForeignKey(
-        SourceLogicTreeComponent,
+        SourceLogicTreeSource,
         related_name="slt_weighted_components",
         null=True,
         on_delete=models.SET_NULL,
@@ -102,6 +102,6 @@ class HazardSolution(models.Model):
         LocationList, related_name="hazard_solutions"
     )
     slt_components = models.ManyToManyField(
-        SourceLogicTreeWeightedComponent, related_name="hazard_solutions"
+        SourceLogicTreeBranch, related_name="hazard_solutions"
     )
 

@@ -70,12 +70,12 @@ class SourceLogicTreeDocument(DocumentWithNodeId):
     })    
 
 @registry.register_document
-class SourceLogicTreeComponentDocument(DocumentWithNodeId):
+class SourceLogicTreeSourceDocument(DocumentWithNodeId):
     class Index:
         name = COMMON_INDEX
 
     class Django:
-        model = models.SourceLogicTreeComponent
+        model = models.SourceLogicTreeSource
         fields = [
             'tag', 
             'notes',
@@ -92,13 +92,13 @@ class SourceLogicTreeComponentDocument(DocumentWithNodeId):
 
 
 @registry.register_document
-class SourceLogicTreeWeightedComponentDocument(DocumentWithNodeId):
+class SourceLogicTreeBranchDocument(DocumentWithNodeId):
     
     class Index:
         name = COMMON_INDEX
     
     class Django:
-        model = models.SourceLogicTreeWeightedComponent
+        model = models.SourceLogicTreeBranch
         fields = [
             'weight',
         ]

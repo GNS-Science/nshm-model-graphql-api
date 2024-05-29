@@ -6,8 +6,8 @@ from .models import (
     LocationList,
     SeismicHazardModel,
     SourceLogicTree,
-    SourceLogicTreeComponent,
-    SourceLogicTreeWeightedComponent,
+    SourceLogicTreeSource,
+    SourceLogicTreeBranch,
 )
 
 
@@ -24,7 +24,7 @@ class GMCMLogicTreeAdmin(admin.ModelAdmin):
     fields = ["version", "notes"]
 
 
-class SourceLogicTreeComponentAdmin(admin.ModelAdmin):
+class SourceLogicTreeSourceAdmin(admin.ModelAdmin):
     fields = [
         "tag",
         "notes",
@@ -37,7 +37,7 @@ class SourceLogicTreeComponentAdmin(admin.ModelAdmin):
     list_filter = ["tectonic_region", "group"]
 
 
-class SourceLogicTreeWeightedComponentAdmin(admin.ModelAdmin):
+class SourceLogicTreeBranchAdmin(admin.ModelAdmin):
     fields = ["weight", "source_logic_tree", "source_logic_tree_component"]
 
 
@@ -61,9 +61,9 @@ class HazardSolutionAdmin(admin.ModelAdmin):
 admin.site.register(SeismicHazardModel, SeismicHazardModelAdmin)
 admin.site.register(SourceLogicTree, SourceLogicTreeAdmin)
 admin.site.register(GMCMLogicTree, GMCMLogicTreeAdmin)
-admin.site.register(SourceLogicTreeComponent, SourceLogicTreeComponentAdmin)
+admin.site.register(SourceLogicTreeSource, SourceLogicTreeSourceAdmin)
 admin.site.register(
-    SourceLogicTreeWeightedComponent, SourceLogicTreeWeightedComponentAdmin
+    SourceLogicTreeBranch, SourceLogicTreeBranchAdmin
 )
 
 admin.site.register(LocationList, LocationListAdmin)
