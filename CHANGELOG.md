@@ -1,5 +1,10 @@
 # Changelog
 
+
+## [0.2.0] 2024-05-30
+ - Complete reset, no more django
+ - all previous code is mothballed
+
 ## [0.1.3] - 2023-09-04
 ## Added
  - new about and version resolvers
