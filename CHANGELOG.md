@@ -12,6 +12,7 @@
  - Node resolver support for NshmModel
  - get_model resolver
  - get_models resolver
+ - source logic tree models and resolvers
 
 ## [0.1.3] - 2023-09-04
 ### Added
