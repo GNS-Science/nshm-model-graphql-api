@@ -13,6 +13,7 @@ log = logging.getLogger(__name__)
 class SourceLogicTreeBranch(graphene.ObjectType):
     model_version = graphene.String()
     weight = graphene.Float()
+    tag = graphene.String()
 
 
 class SourceBranchSet(graphene.ObjectType):
@@ -27,7 +28,7 @@ class SourceBranchSet(graphene.ObjectType):
         for bs in slt.branch_sets:
             if bs.short_name == root.short_name:
                 for ltb in bs.branches:
-                    yield SourceLogicTreeBranch(root.model_version, ltb.weight)
+                    yield SourceLogicTreeBranch(root.model_version, ltb.weight, ltb.tag)
 
 
 class SourceLogicTree(graphene.ObjectType):

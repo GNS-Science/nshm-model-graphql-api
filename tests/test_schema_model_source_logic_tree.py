@@ -60,6 +60,7 @@ def test_get_model_and_branch_set_branches(client, model_version):
                         short_name
                         branches {
                             __typename
+                            tag
                             model_version
                             weight
                         }
@@ -78,5 +79,8 @@ def test_get_model_and_branch_set_branches(client, model_version):
     branch_sets = executed["data"]["get_model"]["source_logic_tree"]["branch_sets"]
     assert branch_sets[0]["short_name"] == "PUY"
     assert branch_sets[0]["branches"][0]["weight"] <= 1.0
+    assert (
+        branch_sets[0]["branches"][0]["tag"] == "[dm0.7, bN[0.902, 4.6], C4.0, s0.28]"
+    )
     assert branch_sets[0]["branches"][0]["__typename"] == "SourceLogicTreeBranch"
     assert branch_sets[0]["branches"][0]["model_version"] == model_version
