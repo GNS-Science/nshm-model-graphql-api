@@ -9,7 +9,10 @@ packages = [{include = "nshm_model_graphql_api"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
+nzshm-model = {git = "https://github.com/GNS-Science/nzshm-model", rev = "pre-release"}
+graphene = "^3.3"
 
+[tool.poetry.group.dev.dependencies]
 tox = "^4.2.8"
 black  = { version = "^24.3.0"}
 isort  = { version = "^5.8.0"}
@@ -19,24 +22,8 @@ pytest = "^7.4.0"
 pytest-cov  = { version = "^2.12.0"}
 virtualenv  = { version = "^20.2.2", optional = true}
 pip  = { version = "^23.2.1", optional = true}
-
 bump2version = {version = "^1.0.1"}
 mypy = "^1.5.1"
-nzshm-model = {git = "https://github.com/GNS-Science/nzshm-model", rev = "pre-release"}
-graphene = "^3.3"
-
-[tool.poetry.extras]
-test = [
-    "pytest",
-    "black",
-    "isort",
-    "mypy",
-    "flake8",
-    "flake8-docstrings",
-    "pytest-cov"
-    ]
-
-dev = ["tox", "virtualenv", "pip", "mypy", "isort", "black", "pytest", "flake8", "bump2version"]
 
 [build-system]
 requires = ["poetry-core"]

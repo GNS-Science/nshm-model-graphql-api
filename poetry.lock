@@ -1190,11 +1190,7 @@ files = [
 [package.extras]
 watchmedo = ["PyYAML (>=3.10)"]
 
-[extras]
-dev = ["black", "bump2version", "flake8", "isort", "mypy", "pip", "pytest", "tox", "virtualenv"]
-test = ["black", "flake8", "flake8-docstrings", "isort", "mypy", "pytest", "pytest-cov"]
-
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "5dec55abb558d82943e15fc3772f3c153689222ca2835905579925f73ea1eca8"
+content-hash = "40238cc497240cd950268baf686fe5d26c232d3a5d80157bd8d3ed9f1add4924"
