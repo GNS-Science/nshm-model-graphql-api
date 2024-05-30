@@ -23,6 +23,7 @@ pip  = { version = "^23.2.1", optional = true}
 bump2version = {version = "^1.0.1"}
 mypy = "^1.5.1"
 nzshm-model = {git = "https://github.com/GNS-Science/nzshm-model", rev = "pre-release"}
+graphene = "^3.3"
 
 [tool.poetry.extras]
 test = [
