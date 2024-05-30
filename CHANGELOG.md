@@ -8,6 +8,11 @@
  - flake8 config
  - new about and version resolvers
 
+### Added
+ - Node resolver support for NshmModel
+ - get_model resolver
+ - get_models resolver
+
 ## [0.1.3] - 2023-09-04
 ### Added
  - new about and version resolvers
