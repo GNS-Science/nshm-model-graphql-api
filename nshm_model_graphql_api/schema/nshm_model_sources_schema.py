@@ -57,10 +57,11 @@ class BranchInversionSource(graphene.ObjectType):
     branch_set_short_name = graphene.String()
     nrml_id = graphene.ID()
     rupture_set_id = graphene.ID()
+    inversion_id = graphene.ID()
 
     def resolve_id(self, info):
         klass, nrml_id = from_global_id(self.nrml_id)
-        return f"{self.model_version}:{self.branch_set_short_name}:{nrml_id}"
+        return f"{self.model_version}:{self.branch_set_short_name}:{nrml_id}" # TODO maybe this is just nrml_id
 
     @classmethod
     def get_node(cls, info, node_id: str):
@@ -77,6 +78,7 @@ class BranchInversionSource(graphene.ObjectType):
             branch_set_short_name=branch_set_short_name,
             nrml_id=src.nrml_id,
             rupture_set_id=src.rupture_set_id,
+            inversion_id=src.inversion_id
         )
 
     # def resolve_rupture_set_id(root, info, **kwargs):
