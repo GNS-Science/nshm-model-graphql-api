@@ -42,7 +42,7 @@ def test_get_model_as_node(client, version):
     "model_version",
     ["NSHM_v1.0.0", "NSHM_v1.0.4"],
 )
-def test_get_model_source_logic_tree_as_node(client, model_version):
+def test_get_model_SourceLogicTree_as_node(client, model_version):
     QUERY = """
     query {
         node(id: "%s")
@@ -76,7 +76,9 @@ def test_get_model_source_logic_tree_as_node(client, model_version):
         ("NSHM_v1.0.4", "PUY", "Puysegur"),
     ],
 )
-def test_get_model_branch_set_as_node(client, model_version, short_name, long_name):
+def test_get_model_SourceBranchSet_as_node(
+    client, model_version, short_name, long_name
+):
     QUERY = """
     query {
         node(id: "%s")
@@ -124,7 +126,7 @@ def test_get_model_branch_set_as_node(client, model_version, short_name, long_na
         ("NSHM_v1.0.4", "PUY", "[dm0.7, bN[0.902, 4.6], C4.0, s0.28]", 0.21),
     ],
 )
-def test_get_model_source_logic_tree_branch_as_node(
+def test_get_model_SourceLogicTreeBranch_as_node(
     client, model_version, branch_set_short_name, tag, weight
 ):
     QUERY = """
@@ -196,7 +198,7 @@ def test_get_model_source_logic_tree_branch_as_node(
         ),
     ],
 )
-def test_get_model_branch_inversion_source_as_node(
+def test_get_model_BranchInversionSource_as_node(
     client, model_version, branch_set_short_name, nrml_id, rupture_set_id, error
 ):
     QUERY = """
