@@ -30,7 +30,7 @@ package:
 custom:
   #serverless-wsgi settings
   wsgi:
-    app: nzshm_model_graphql_api.wsgi.application
+    app: nshm_model_graphql_api.nshm_model_graphql_api.app
     packRequirements: false
     pythonBin: python3
 
