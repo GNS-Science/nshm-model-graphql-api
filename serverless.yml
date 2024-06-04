@@ -151,26 +151,3 @@ functions:
     #       - test
     #       - prod
 
-# resources:
-#   Resources:
-#     ToshiBucket:
-#       Type: AWS::S3::Bucket
-#       Properties:
-#         BucketName: ${self:custom.s3_bucket}
-
-#     # following on from
-#     #   https://www.serverless.com/blog/build-geosearch-graphql-api-aws-appsync-elasticsearch
-#     ElasticSearchInstance:
-#       Type: AWS::Elasticsearch::Domain
-#       Properties:
-#         ElasticsearchVersion: 6.2
-#         DomainName: "${self:custom.esDomainName}"
-#         EBSOptions:
-#           EBSEnabled: true
-#           VolumeType: gp2
-#           VolumeSize: 10
-#         ElasticsearchClusterConfig:
-#           InstanceType: t2.small.elasticsearch
-#           InstanceCount: 1
-#           DedicatedMasterEnabled: false
-#           ZoneAwarenessEnabled: false

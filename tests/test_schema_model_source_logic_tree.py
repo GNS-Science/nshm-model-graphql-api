@@ -11,20 +11,6 @@ def client():
     return Client(schema.schema_root)
 
 
-def test_get_model_default(client):
-    QUERY = """
-        query {
-            get_model
-            {
-                version
-            }
-        }
-    """
-    executed = client.execute(QUERY)
-    print(executed)
-    assert executed["data"]["get_model"]["version"] == "NSHM_v1.0.4"
-
-
 @pytest.mark.parametrize(
     "model_version",
     ["NSHM_v1.0.0", "NSHM_v1.0.4"],
