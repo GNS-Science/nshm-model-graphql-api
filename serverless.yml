@@ -20,9 +20,7 @@ package:
     - '!package-log.json'
     - '!tests/**'
     - '!**'
-    - db.sqlite3
-    - _sqlite3.cpython-310-x86_64-linux-gnu.so
-    - nzshm_model_graphql_api/**
+    - nshm_model_graphql_api/**
 
 custom:
   #serverless-wsgi settings
