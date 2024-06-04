@@ -100,7 +100,7 @@ provider:
 
   apiGateway:
     apiKeys:
-      - name: TempApiKey-${self:custom.stage}
+      - name: TempApiKey-${self:custom.stack_name}
         description: Api key until we have an auth function # Optional
 
 functions:
