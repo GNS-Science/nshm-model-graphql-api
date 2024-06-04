@@ -1,16 +1,25 @@
 # Changelog
 
 
-## [0.2.0] 2024-05-30
+## [0.2.0] - 2024-05-30
+### Changed
  - Complete reset, no more django
  - all previous code is mothballed
+ - flake8 config
+ - new about and version resolvers
+
+### Added
+ - Node resolver support for NshmModel
+ - get_model resolver
+ - get_models resolver
+ - source logic tree models and resolvers
 
 ## [0.1.3] - 2023-09-04
-## Added
+### Added
  - new about and version resolvers
 
 ## [0.1.2] - 2023-09-04
-## Changed
+### Changed
  - configure static_url correctly for both local & AWS
 
 ## [0.1.1] - 2023-09-01
