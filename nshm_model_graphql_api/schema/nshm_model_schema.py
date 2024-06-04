@@ -42,6 +42,11 @@ def get_nshm_models() -> Iterator[NshmModel]:
         yield NshmModel(version=version)
 
 
-def get_nshm_model(version: str) -> Optional[NshmModel]:
-    model = nm.get_model_version(version)
+def get_nshm_model(version: Optional[str] = None) -> Optional[NshmModel]:
+    # model = nm.get_model_version(version)
+    model = nm.get_model_version(version) if version else nm.get_model_version()
     return NshmModel(version=model.version, title=model.title) if model else None
+
+
+def get_current_model_version() -> str:
+    return nm.CURRENT_VERSION

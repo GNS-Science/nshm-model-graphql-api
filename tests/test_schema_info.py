@@ -30,3 +30,14 @@ def test_get_version(client):
     executed = client.execute(QUERY)
     print(executed)
     assert __version__ in executed["data"]["version"]
+
+
+def test_get_current_model_version(client):
+    QUERY = """
+    query {
+        current_model_version
+    }
+    """
+    executed = client.execute(QUERY)
+    print(executed)
+    assert executed["data"]["current_model_version"] == "NSHM_v1.0.4"
