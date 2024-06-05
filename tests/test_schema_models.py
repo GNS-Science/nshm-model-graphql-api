@@ -1,5 +1,6 @@
 import pytest
 from graphene.test import Client
+from graphql_relay import to_global_id
 
 from nshm_model_graphql_api import schema
 
@@ -13,13 +14,19 @@ def test_get_models(client):
     QUERY = """
     query {
         get_models {
+            id
             version
+            title
         }
     }
     """
     executed = client.execute(QUERY)
     print(executed)
     assert executed["data"]["get_models"][0]["version"] == "NSHM_v1.0.0"
+    assert executed["data"]["get_models"][0]["title"] == "Initial version"
+    assert executed["data"]["get_models"][0]["id"] == to_global_id(
+        "NshmModel", "NSHM_v1.0.0"
+    )
 
 
 def test_get_model_default(client):
