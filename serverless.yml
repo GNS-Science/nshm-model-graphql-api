@@ -31,16 +31,15 @@ custom:
 
   #serverless-python-requirements settings
   pythonRequirements:
-    usePoetry: true
+    dockerizePip: True
     useDownloadCache: false
     useStaticCache: false
+    slim: true
+    slimPatterns:
+      - '**/*.egg-info*'
+    noDeploy:
+      - botocore
     
-    # slim: true
-    # slimPatterns:
-    #   - '**/*.egg-info*'
-    # noDeploy:
-    #   - botocore
-
   #Lambda warmer see https://www.serverless.com/plugins/serverless-plugin-warmup
   # warmup:
   #   lowConcurrencyWarmer:
