@@ -12,9 +12,10 @@ python = "^3.10"
 nzshm-model = {git = "https://github.com/GNS-Science/nzshm-model", rev = "pre-release"}
 flask = "^3.0.3"
 flask-cors = "^4.0.1"
-graphene = "<3"
-flask-graphql = "^2.0.1"
 pyyaml = "^6.0.1"
+graphql-server = {extras = ["flask"], version = "^3.0.0b7"}
+graphene = "^3.3"
+# nzshm-model = "^0.9.3"
 
 [tool.poetry.group.dev.dependencies]
 tox = "^4.2.8"
