@@ -39,7 +39,8 @@ class NshmModel(graphene.ObjectType):
 
 def get_nshm_models() -> Iterator[NshmModel]:
     for version in nm.all_model_versions():
-        yield NshmModel(version=version)
+        model = nm.get_model_version(version)
+        yield NshmModel(version=model.version, title=model.title)
 
 
 def get_nshm_model(version: Optional[str] = None) -> Optional[NshmModel]:
