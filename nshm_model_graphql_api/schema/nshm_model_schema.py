@@ -7,6 +7,7 @@ import graphene
 import nzshm_model as nm
 from graphene import relay
 
+from .nshm_model_gmms_schema import GroundMotionModelLogicTree
 from .nshm_model_sources_schema import SourceLogicTree
 
 log = logging.getLogger(__name__)
@@ -21,6 +22,7 @@ class NshmModel(graphene.ObjectType):
     version = graphene.String()
     title = graphene.String()
     source_logic_tree = graphene.Field(SourceLogicTree)
+    gmm_logic_tree = graphene.Field(GroundMotionModelLogicTree)
 
     def resolve_id(self, info):
         return self.version
@@ -28,9 +30,12 @@ class NshmModel(graphene.ObjectType):
     @staticmethod
     def resolve_source_logic_tree(root, info, **kwargs):
         log.info(f"resolve_source_logic_tree root: {root} kwargs: {kwargs}")
-        return SourceLogicTree(
-            model_version=root.version
-        )  # , branch_sets=get_branch_sets(slt))
+        return SourceLogicTree(model_version=root.version)
+
+    @staticmethod
+    def resolve_gmm_logic_tree(root, info, **kwargs):
+        log.info(f"resolve_gmm_logic_tree root: {root} kwargs: {kwargs}")
+        return GroundMotionModelLogicTree(model_version=root.version)
 
     @classmethod
     def get_node(cls, info, version: str):
