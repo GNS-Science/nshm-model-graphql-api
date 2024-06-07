@@ -45,12 +45,12 @@ class GmmLogicTreeBranch(graphene.ObjectType):
     model_version = graphene.String()
     branch_set_short_name = graphene.String()
     gsim_name = graphene.String()
-    gsim_args = graphene.String()
+    gsim_args = graphene.JSONString()
     tectonic_region_type = graphene.String()  # should be an enum
     weight = graphene.Float()
 
     def resolve_id(self, info):
-        return f"{self.model_version}|{self.branch_set_short_name}|{self.gsim_name}|{self.gsim_args}"
+        return f"{self.model_version}|{self.branch_set_short_name}|{self.gsim_name}|{json.dumps(self.gsim_args)}"
 
     @classmethod
     def get_node(cls, info, node_id: str):
@@ -61,8 +61,9 @@ class GmmLogicTreeBranch(graphene.ObjectType):
         return GmmLogicTreeBranch(
             model_version=model_version,
             branch_set_short_name=branch_set_short_name,
+            tectonic_region_type=gltb.tectonic_region_type,
             gsim_name=gltb.gsim_name,
-            gsim_args=json.dumps(gltb.gsim_args),
+            gsim_args=gltb.gsim_args,
             weight=gltb.weight,
         )
 
@@ -104,10 +105,11 @@ class GmmBranchSet(graphene.ObjectType):
             log.debug(ltb)
             yield GmmLogicTreeBranch(
                 model_version=root.model_version,
-                tectonic_region_type=root.tectonic_region_type,
+                branch_set_short_name=root.short_name,
+                tectonic_region_type=ltb.tectonic_region_type,
                 weight=ltb.weight,
                 gsim_name=ltb.gsim_name,
-                gsim_args=str(ltb.gsim_args),
+                gsim_args=ltb.gsim_args,
             )
 
 
