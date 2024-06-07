@@ -844,7 +844,7 @@ files = [
 
 [[package]]
 name = "nzshm-model"
-version = "0.10.4"
+version = "0.10.5"
 description = "The logic tree definitions, final configurations, and versioning of the New Zealand | Aotearoa National Seismic Hazard Model"
 optional = false
 python-versions = ">=3.9,<4.0"
@@ -867,7 +867,7 @@ toshi = ["boto3[toshi] (>=1.26.28,<2.0.0)", "nshm-toshi-client[toshi] (>=1.0.1,<
 type = "git"
 url = "https://github.com/GNS-Science/nzshm-model"
 reference = "pre-release"
-resolved_reference = "f79458021def6b52fe2cad3ccbbfdf1bc084ae8e"
+resolved_reference = "c16652f9d92ccc8d2f66a1e6750d56945dbcafb7"
 
 [[package]]
 name = "packaging"

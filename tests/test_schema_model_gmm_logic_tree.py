@@ -25,8 +25,8 @@ def test_get_model_and_branch_sets(client, model_version):
                     branch_sets {
                         __typename
                         model_version
-                        # short_name
-                        # long_name
+                        short_name
+                        long_name
                         tectonic_region_type
                     }
                 }
@@ -44,7 +44,8 @@ def test_get_model_and_branch_sets(client, model_version):
     assert branch_sets[0]["__typename"] == "GmmBranchSet"
     assert branch_sets[0]["model_version"] == model_version
     assert branch_sets[0]["tectonic_region_type"] == "Active Shallow Crust"
-    # assert branch_sets[0]["short_name"] == "PUY"
+    assert branch_sets[0]["short_name"] == "CRU"
+    assert branch_sets[0]["long_name"] == "Crustal"
 
 
 @pytest.mark.parametrize(

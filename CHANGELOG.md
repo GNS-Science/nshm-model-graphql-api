@@ -1,7 +1,7 @@
 # Changelog
 
 
-## [0.2.0] - 2024-05-30
+## [0.2.0] - 2024-06-07
 ### Changed
  - Complete reset, no more django
  - all previous code is mothballed
@@ -13,6 +13,7 @@
  - get_model resolver
  - get_models resolver
  - source logic tree models and resolvers
+ - gmmm logic tree models and resolvers
 
 ## [0.1.3] - 2023-09-04
 ### Added

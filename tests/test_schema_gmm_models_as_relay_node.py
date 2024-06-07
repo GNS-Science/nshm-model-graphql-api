@@ -42,10 +42,10 @@ def test_get_model_SourceLogicTree_as_node(client, model_version):
 @pytest.mark.parametrize(
     "model_version, short_name, long_name",
     [
-        ("NSHM_v1.0.0", "Active Shallow Crust", "Crustal"),
-        # ("NSHM_v1.0.0", "PUY", "Puysegur"),
-        # ("NSHM_v1.0.4", "CRU", "Crustal"),
-        # ("NSHM_v1.0.4", "PUY", "Puysegur"),
+        ("NSHM_v1.0.0", "CRU", "Crustal"),
+        ("NSHM_v1.0.0", "SLAB", "Subduction Intraslab"),
+        ("NSHM_v1.0.4", "CRU", "Crustal"),
+        ("NSHM_v1.0.4", "INTER", "Subduction Interface"),
     ],
 )
 def test_get_model_GmmBranchSet_as_node(client, model_version, short_name, long_name):
@@ -71,36 +71,34 @@ def test_get_model_GmmBranchSet_as_node(client, model_version, short_name, long_
     executed = client.execute(QUERY)
     print(executed)
     assert executed["data"]["node"]["model_version"] == model_version
-    assert executed["data"]["node"]["tectonic_region_type"] == short_name
-    # assert executed["data"]["node"]["long_name"] == long_name
+    assert executed["data"]["node"]["short_name"] == short_name
+    assert executed["data"]["node"]["long_name"] == long_name
     assert executed["data"]["node"]["id"] == to_global_id(
         "GmmBranchSet", f"{model_version}:{short_name}"
     )
 
 
-'''
-
 @pytest.mark.parametrize(
-    "model_version, branch_set_short_name, tag, weight",
+    "model_version, branch_set_short_name, gsim_name, gsim_args, weight",
     [
         (
             "NSHM_v1.0.0",
             "CRU",
-            "[dmgeologic, tdFalse, bN[1.089, 4.6], C4.2, s1.0]",
-            0.00541000379473566,
+            "Stafford2022",
+            '{"mu_branch": "Upper"}',
+            0.117,
         ),
-        ("NSHM_v1.0.0", "PUY", "[dm0.7, bN[0.902, 4.6], C4.0, s0.28]", 0.21),
         (
             "NSHM_v1.0.4",
-            "CRU",
-            "[dmgeologic, tdFalse, bN[1.089, 4.6], C4.2, s1.41]",
-            0.00286782725429677,
+            "INTER",
+            "Atkinson2022SInter",
+            '{"epistemic": "Lower", "modified_sigma": "true"}',
+            0.081,
         ),
-        ("NSHM_v1.0.4", "PUY", "[dm0.7, bN[0.902, 4.6], C4.0, s0.28]", 0.21),
     ],
 )
-def test_get_model_SourceLogicTreeBranch_as_node(
-    client, model_version, branch_set_short_name, tag, weight
+def test_get_model_GmmLogicTreeBranch_as_node(
+    client, model_version, branch_set_short_name, gsim_name, gsim_args, weight
 ):
     QUERY = """
     query {
@@ -109,31 +107,28 @@ def test_get_model_SourceLogicTreeBranch_as_node(
             ... on Node {
                 id
             }
-            ... on SourceLogicTreeBranch {
+            ... on GmmLogicTreeBranch {
                 model_version
                 branch_set_short_name
-                tag
+                gsim_name
+                gsim_args
                 weight
-                sources {
-                    ... on BranchInversionSource {
-                        nrml_id
-                    }
-                }
             }
 
         }
     }
     """ % to_global_id(
-        "SourceLogicTreeBranch", f"{model_version}:{branch_set_short_name}:{tag}"
+        "GmmLogicTreeBranch",
+        f"{model_version}|{branch_set_short_name}|{gsim_name}|{gsim_args}",
     )
     executed = client.execute(QUERY)
     print(executed)
     assert executed["data"]["node"]["id"] == to_global_id(
-        "SourceLogicTreeBranch", f"{model_version}:{branch_set_short_name}:{tag}"
+        "GmmLogicTreeBranch",
+        f"{model_version}|{branch_set_short_name}|{gsim_name}|{gsim_args}",
     )
 
     assert executed["data"]["node"]["model_version"] == model_version
     assert executed["data"]["node"]["branch_set_short_name"] == branch_set_short_name
-    assert executed["data"]["node"]["tag"] == tag
+    assert executed["data"]["node"]["gsim_name"] == gsim_name
     assert executed["data"]["node"]["weight"] == weight
-'''
