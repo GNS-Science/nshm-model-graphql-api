@@ -1,10 +1,8 @@
 # Changelog
 
+## [0.3.0] - 2025-07-29
 
-## [0.2.0] - 2024-06-07
 ### Changed
- - Complete reset, no more django
- - all previous code is mothballed
  - flake8 config
  - new about and version resolvers
 
@@ -14,6 +12,11 @@
  - get_models resolver
  - source logic tree models and resolvers
  - gmmm logic tree models and resolvers
+
+## [0.2.0] - 2024-06-07
+### Changed
+ - Complete reset, no more django
+ - all previous code is mothballed
 
 ## [0.1.3] - 2023-09-04
 ### Added
