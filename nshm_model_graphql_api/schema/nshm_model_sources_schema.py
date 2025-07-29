@@ -1,0 +1,166 @@
+"""Define graphene model for nzshm_model source logic tree classes."""
+
+import logging
+from functools import lru_cache
+
+import graphene
+import nzshm_model as nm
+from graphene import relay
+from nzshm_model.logic_tree.source_logic_tree.version2 import logic_tree
+
+log = logging.getLogger(__name__)
+
+
+@lru_cache
+def get_model_by_version(model_version: str) -> nm.NshmModel:
+    """a caching wrapper for nm"""
+    return nm.get_model_version(model_version)
+
+
+# TODO: this method belongs on the nzshm-model slt class
+@lru_cache
+def get_branch_set(model_version, short_name):
+    slt = get_model_by_version(model_version).source_logic_tree
+    for bs in slt.branch_sets:
+        if bs.short_name == short_name:
+            return bs
+    assert 0, f"branch set {short_name} was not found"  # pragma: no cover
+
+
+# TODO: this method belongs on the nzshm-model slt class
+@lru_cache
+def get_logic_tree_branch(model_version, short_name, tag):
+    log.info(f"get_logic_tree_branch: {short_name} tag: {tag}")
+    branch_set = get_branch_set(model_version, short_name)
+    for ltb in branch_set.branches:
+        if ltb.tag == tag:
+            return ltb
+        # print(short_name, ltb.tag)
+    assert 0, f"branch with {tag} was not found"  # pragma: no cover
+
+
+class BranchInversionSource(graphene.ObjectType):
+    nrml_id = graphene.ID()
+    rupture_set_id = graphene.ID()
+    inversion_id = graphene.ID()
+
+
+class BranchDistributedSource(graphene.ObjectType):
+    nrml_id = graphene.ID()
+
+
+class BranchSource(graphene.Union):
+    class Meta:
+        types = (BranchInversionSource, BranchDistributedSource)
+
+
+class SourceLogicTreeBranch(graphene.ObjectType):
+    class Meta:
+        interfaces = (relay.Node,)
+
+    model_version = graphene.String()
+    branch_set_short_name = graphene.String()
+    tag = graphene.String()
+    weight = graphene.Float()
+    sources = graphene.List(BranchSource)
+
+    def resolve_id(self, info):
+        return f"{self.model_version}:{self.branch_set_short_name}:{self.tag}"
+
+    @classmethod
+    def get_node(cls, info, node_id: str):
+        model_version, branch_set_short_name, tag = node_id.split(":")
+        sltb = get_logic_tree_branch(model_version, branch_set_short_name, tag)
+        return SourceLogicTreeBranch(
+            model_version=model_version,
+            branch_set_short_name=branch_set_short_name,
+            tag=tag,
+            weight=sltb.weight,
+        )
+
+    @staticmethod
+    def resolve_sources(root, info, **kwargs):
+        log.info(f"resolve SourceLogicTreeBranch.sources root: {root} kwargs: {kwargs}")
+        ltb = get_logic_tree_branch(
+            root.model_version, root.branch_set_short_name, root.tag
+        )
+        for src in ltb.sources:
+            if isinstance(src, logic_tree.InversionSource):
+                # print(src)
+                yield BranchInversionSource(
+                    # model_version=root.model_version,
+                    # branch_set_short_name=root.branch_set_short_name,
+                    nrml_id=src.nrml_id,
+                    rupture_set_id=src.rupture_set_id,
+                    inversion_id=src.inversion_id,
+                )
+            elif isinstance(src, logic_tree.DistributedSource):
+                yield BranchDistributedSource(nrml_id=src.nrml_id)
+            else:
+                raise RuntimeError(
+                    f"got unknown source type :{src}"
+                )  # pragma: no cover
+
+
+class SourceBranchSet(graphene.ObjectType):
+
+    class Meta:
+        interfaces = (relay.Node,)
+
+    model_version = graphene.String()
+    short_name = graphene.String()
+    long_name = graphene.String()
+    branches = graphene.List(SourceLogicTreeBranch)
+
+    def resolve_id(self, info):
+        return f"{self.model_version}:{self.short_name}"
+
+    @classmethod
+    def get_node(cls, info, node_id: str):
+        model_version, short_name = node_id.split(":")
+        bs = get_branch_set(model_version, short_name)
+        return SourceBranchSet(
+            model_version=model_version, short_name=short_name, long_name=bs.long_name
+        )
+
+    @staticmethod
+    def resolve_branches(root, info, **kwargs):
+        log.info(f"resolve_branches root: {root} kwargs: {kwargs}")
+        bs = get_branch_set(root.model_version, root.short_name)
+        for ltb in bs.branches:
+            sltb = SourceLogicTreeBranch(
+                model_version=root.model_version,
+                branch_set_short_name=bs.short_name,
+                weight=ltb.weight,
+                tag=ltb.tag,
+            )
+            # log.debug(f'sltb {sltb}')
+            yield sltb
+
+
+class SourceLogicTree(graphene.ObjectType):
+    """A custom Node representing the source logic tree of a given model."""
+
+    class Meta:
+        interfaces = (relay.Node,)
+
+    model_version = graphene.String()
+    branch_sets = graphene.List(SourceBranchSet)
+
+    def resolve_id(self, info):
+        return self.model_version
+
+    @classmethod
+    def get_node(cls, info, model_version: str):
+        return SourceLogicTree(model_version=model_version)
+
+    @staticmethod
+    def resolve_branch_sets(root, info, **kwargs):
+        log.info(f"resolve_branch_sets root: {root} kwargs: {kwargs}")
+        slt = get_model_by_version(root.model_version).source_logic_tree
+        for bs in slt.branch_sets:
+            yield SourceBranchSet(
+                model_version=root.model_version,
+                short_name=bs.short_name,
+                long_name=bs.long_name,
+            )

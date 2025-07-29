@@ -20,32 +20,26 @@ package:
     - '!package-log.json'
     - '!tests/**'
     - '!**'
-    - db.sqlite3
-    - _sqlite3.cpython-310-x86_64-linux-gnu.so
-    - nzshm_model_graphql_api/**
-    - nshm/**
-    - pipeline/**
-    - staticfiles/**
+    - nshm_model_graphql_api/**
 
 custom:
   #serverless-wsgi settings
   wsgi:
-    app: nzshm_model_graphql_api.wsgi.application
+    app: nshm_model_graphql_api.nshm_model_graphql_api.app
     packRequirements: false
     pythonBin: python3
 
   #serverless-python-requirements settings
   pythonRequirements:
-    usePoetry: true
+    dockerizePip: True
     useDownloadCache: false
     useStaticCache: false
+    slim: true
+    slimPatterns:
+      - '**/*.egg-info*'
+    noDeploy:
+      - botocore
     
-    # slim: true
-    # slimPatterns:
-    #   - '**/*.egg-info*'
-    # noDeploy:
-    #   - botocore
-
   #Lambda warmer see https://www.serverless.com/plugins/serverless-plugin-warmup
   # warmup:
   #   lowConcurrencyWarmer:
@@ -103,7 +97,7 @@ provider:
 
   apiGateway:
     apiKeys:
-      - name: TempApiKey-${self:custom.stage}
+      - name: TempApiKey-${self:custom.stack_name}
         description: Api key until we have an auth function # Optional
 
 functions:
@@ -154,26 +148,3 @@ functions:
     #       - test
     #       - prod
 
-# resources:
-#   Resources:
-#     ToshiBucket:
-#       Type: AWS::S3::Bucket
-#       Properties:
-#         BucketName: ${self:custom.s3_bucket}
-
-#     # following on from
-#     #   https://www.serverless.com/blog/build-geosearch-graphql-api-aws-appsync-elasticsearch
-#     ElasticSearchInstance:
-#       Type: AWS::Elasticsearch::Domain
-#       Properties:
-#         ElasticsearchVersion: 6.2
-#         DomainName: "${self:custom.esDomainName}"
-#         EBSOptions:
-#           EBSEnabled: true
-#           VolumeType: gp2
-#           VolumeSize: 10
-#         ElasticsearchClusterConfig:
-#           InstanceType: t2.small.elasticsearch
-#           InstanceCount: 1
-#           DedicatedMasterEnabled: false
-#           ZoneAwarenessEnabled: false
