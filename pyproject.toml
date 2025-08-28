@@ -13,7 +13,7 @@ nzshm-model = "0.10.6"
 flask = "^3.0.3"
 flask-cors = "^4.0.1"
 pyyaml = "^6.0.1"
-graphql-server = {extras = ["flask"], version = "^3.0.0"}
+graphql-server = {extras = ["flask"], version = "3.0.0b7"}
 graphene = "^3.3"
 # nzshm-model = "^0.9.3"
 
