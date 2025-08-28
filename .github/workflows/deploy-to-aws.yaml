@@ -16,7 +16,7 @@ jobs:
 
   call-deploy-workflow:
     needs: call-test-workflow
-    uses: GNS-Science/nshm-github-actions/.github/workflows/deploy-to-aws.yml@feature/16-deploy-to-aws
+    uses: GNS-Science/nshm-github-actions/.github/workflows/deploy-to-aws.yml@main
     with:
       python-version: '3.10'
     secrets: inherit
