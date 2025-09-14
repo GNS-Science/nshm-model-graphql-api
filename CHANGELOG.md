@@ -1,9 +1,10 @@
 # Changelog
 
-## [0.3.1] - TBD
+## [0.3.1] - 2025-09-15
 
 ### Changed
- - graphql-server updated
+ - graphql-server pinned
+ - dev dependencies updated
 
 
 ## [0.3.0] - 2025-07-29
