@@ -6,7 +6,7 @@ from functools import lru_cache
 import graphene
 import nzshm_model as nm
 from graphene import relay
-from nzshm_model.logic_tree.source_logic_tree.version2 import logic_tree
+from nzshm_model.logic_tree.source_logic_tree import logic_tree
 
 log = logging.getLogger(__name__)
 
