@@ -1,4 +1,9 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: gnssciencenshm
+# "app" enables Serverless Framework Dashboard features and sharing them with other Services.
+app: nshm-model-graphql-api
 service: nzshm22-model-graphql-api
+configValidationMode: error
 
 plugins:
   - serverless-python-requirements
