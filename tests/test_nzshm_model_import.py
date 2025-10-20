@@ -17,9 +17,4 @@ def test_available_versions():
 )
 def test_version_config(model, model_version):
     mod = nzshm_model.get_model_version(model)
-    # mod = nzshm_model.get_model_version(model)
-
     assert mod.version == model_version
-
-    assert mod.slt_config is not None
-    assert mod.slt_config.logic_tree_permutations is not None

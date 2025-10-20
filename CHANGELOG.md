@@ -1,11 +1,23 @@
 # Changelog
 
+
+## [0.4.0] - 2025-10-20
+
+### Changed
+ - migrate to serverless 4
+ - use python 3.12
+ - migrate pyproject.toml to PEP508
+ - ensureCI/CD workflows use minimum install footprints
+ - update to `nzshm-model 0.14.0`
+
+### Added
+ - tox audit step
+
 ## [0.3.1] - 2025-09-15
 
 ### Changed
  - graphql-server pinned
  - dev dependencies updated
-
 
 ## [0.3.0] - 2025-07-29
 

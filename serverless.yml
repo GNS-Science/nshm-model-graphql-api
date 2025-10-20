@@ -1,4 +1,9 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: gnssciencenshm
+# "app" enables Serverless Framework Dashboard features and sharing them with other Services.
+app: nshm-model-graphql-api
 service: nzshm22-model-graphql-api
+configValidationMode: error
 
 plugins:
   - serverless-python-requirements
@@ -72,7 +77,7 @@ custom:
 
 provider:
   name: aws
-  runtime: python3.10
+  runtime: python3.12
   stage: ${opt:stage, 'dev'}
   region: ap-southeast-2
   environment:
@@ -120,27 +125,10 @@ functions:
       - http:
           path: graphql/{proxy+}
           method: GET
-      # - http:
-      #     path: admin
-      #     method: OPTIONS
-      # - http:
-      #     path: admin/{proxy+}
-      #     method: GET
-      # - http:
-      #     path: admin
-      #     method: POST
-      #     private: true
-      # - http:
-      #     path: static
-      #     method: OPTIONS
       - http:
           path: static/{proxy+}
           method: GET                                       
     environment:
-      # ES_ENDPOINT: {"Fn::Join": ["", ["https://", "Fn::GetAtt": ["ElasticSearchInstance", "DomainEndpoint"]]]}
-      # ES_INDEX: ${self:custom.esIndex}
-      # ES_REGION: ${self:custom.region}
-      # ES_DOMAIN_NAME: ${self:custom.esDomainName}
       STACK_NAME: ${self:custom.stack_name}
     # warmup:
     #   lowConcurrencyWarmer:
