@@ -22,7 +22,7 @@ yarn install
 Now `yarn sls info` should print something like ...
 
 ```
-chrisbc@tryharder-ubuntu:/GNSDATA/API/kororaa-graphql-api$ sls info
+$ sls info
 Running "serverless" from node_modules
 Environment: darwin, node 22.16.0, framework 3.40.0 (local), plugin 7.2.3, SDK 4.5.1
 Credentials: Local, "default" profile
