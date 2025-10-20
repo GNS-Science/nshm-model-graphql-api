@@ -19,5 +19,8 @@ jobs:
     uses: GNS-Science/nshm-github-actions/.github/workflows/deploy-to-aws.yml@main
     with:
       python-version: '3.12'
-      smoketest-query: "query {about, current_model_version}"
+      node-version: '22'
+      node-pkg-manager: 'yarn2'
+      smoketest-query: 'query QueryRoot{about}'
     secrets: inherit
+
