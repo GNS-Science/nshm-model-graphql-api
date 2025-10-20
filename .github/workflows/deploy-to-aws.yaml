@@ -18,6 +18,6 @@ jobs:
     needs: call-test-workflow
     uses: GNS-Science/nshm-github-actions/.github/workflows/deploy-to-aws.yml@main
     with:
-      python-version: '3.10'
+      python-version: '3.12'
       smoketest-query: "query {about, current_model_version}"
     secrets: inherit
