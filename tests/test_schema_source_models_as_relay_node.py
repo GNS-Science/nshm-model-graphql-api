@@ -16,27 +16,23 @@ def client():
 )
 def test_get_model_SourceLogicTree_as_node(client, model_version):
     QUERY = """
-    query {
-        node(id: "%s")
-        {
-            ... on Node {
+    query {{
+        node(id: "{}")
+        {{
+            ... on Node {{
                 id
-            }
-            ... on SourceLogicTree {
+            }}
+            ... on SourceLogicTree {{
                 model_version
-            }
-        }
-    }
-    """ % to_global_id(
-        "SourceLogicTree", model_version
-    )
+            }}
+        }}
+    }}
+    """.format(to_global_id("SourceLogicTree", model_version))
     print(QUERY)
     executed = client.execute(QUERY)
     print(executed)
     assert executed["data"]["node"]["model_version"] == model_version
-    assert executed["data"]["node"]["id"] == to_global_id(
-        "SourceLogicTree", model_version
-    )
+    assert executed["data"]["node"]["id"] == to_global_id("SourceLogicTree", model_version)
 
 
 @pytest.mark.parametrize(
@@ -48,35 +44,29 @@ def test_get_model_SourceLogicTree_as_node(client, model_version):
         ("NSHM_v1.0.4", "PUY", "Puysegur"),
     ],
 )
-def test_get_model_SourceBranchSet_as_node(
-    client, model_version, short_name, long_name
-):
+def test_get_model_SourceBranchSet_as_node(client, model_version, short_name, long_name):
     QUERY = """
-    query {
-        node(id: "%s")
-        {
-            ... on Node {
+    query {{
+        node(id: "{}")
+        {{
+            ... on Node {{
                 id
-            }
-            ... on SourceBranchSet {
+            }}
+            ... on SourceBranchSet {{
                 model_version
                 short_name
                 long_name
-            }
+            }}
 
-        }
-    }
-    """ % to_global_id(
-        "SourceBranchSet", f"{model_version}:{short_name}"
-    )
+        }}
+    }}
+    """.format(to_global_id("SourceBranchSet", f"{model_version}:{short_name}"))
     executed = client.execute(QUERY)
     print(executed)
     assert executed["data"]["node"]["model_version"] == model_version
     assert executed["data"]["node"]["short_name"] == short_name
     assert executed["data"]["node"]["long_name"] == long_name
-    assert executed["data"]["node"]["id"] == to_global_id(
-        "SourceBranchSet", f"{model_version}:{short_name}"
-    )
+    assert executed["data"]["node"]["id"] == to_global_id("SourceBranchSet", f"{model_version}:{short_name}")
 
 
 @pytest.mark.parametrize(
@@ -98,33 +88,29 @@ def test_get_model_SourceBranchSet_as_node(
         ("NSHM_v1.0.4", "PUY", "[dm0.7, bN[0.902, 4.6], C4.0, s0.28]", 0.21),
     ],
 )
-def test_get_model_SourceLogicTreeBranch_as_node(
-    client, model_version, branch_set_short_name, tag, weight
-):
+def test_get_model_SourceLogicTreeBranch_as_node(client, model_version, branch_set_short_name, tag, weight):
     QUERY = """
-    query {
-        node(id: "%s")
-        {
-            ... on Node {
+    query {{
+        node(id: "{}")
+        {{
+            ... on Node {{
                 id
-            }
-            ... on SourceLogicTreeBranch {
+            }}
+            ... on SourceLogicTreeBranch {{
                 model_version
                 branch_set_short_name
                 tag
                 weight
-                sources {
-                    ... on BranchInversionSource {
+                sources {{
+                    ... on BranchInversionSource {{
                         nrml_id
-                    }
-                }
-            }
+                    }}
+                }}
+            }}
 
-        }
-    }
-    """ % to_global_id(
-        "SourceLogicTreeBranch", f"{model_version}:{branch_set_short_name}:{tag}"
-    )
+        }}
+    }}
+    """.format(to_global_id("SourceLogicTreeBranch", f"{model_version}:{branch_set_short_name}:{tag}"))
     executed = client.execute(QUERY)
     print(executed)
     assert executed["data"]["node"]["id"] == to_global_id(

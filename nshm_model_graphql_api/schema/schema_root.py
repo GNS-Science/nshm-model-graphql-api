@@ -1,7 +1,6 @@
 """The main API schema."""
 
 import logging
-from typing import Optional
 
 import graphene
 from graphene import relay
@@ -33,14 +32,14 @@ class QueryRoot(graphene.ObjectType):
 
     get_model = graphene.Field(NshmModel, version=graphene.String(required=False))
 
-    def resolve_get_model(root, info, version: Optional[str] = None):
+    def resolve_get_model(root, info, version: str | None = None):
         return get_nshm_model(version)  # if version else get_nshm_model()
 
     def resolve_current_model_version(root, info, **args):
         return get_current_model_version()
 
     def resolve_about(root, info, **args):
-        return "Hello, I am nshm_model_graphql_api, version: %s!" % __version__
+        return f"Hello, I am nshm_model_graphql_api, version: {__version__}!"
 
     def resolve_version(root, info, **args):
         return __version__

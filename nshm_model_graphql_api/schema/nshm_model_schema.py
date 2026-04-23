@@ -1,7 +1,7 @@
 """Define graphene model for nzshm_model class."""
 
 import logging
-from typing import Iterator, Optional
+from collections.abc import Iterator
 
 import graphene
 import nzshm_model as nm
@@ -48,7 +48,7 @@ def get_nshm_models() -> Iterator[NshmModel]:
         yield NshmModel(version=model.version, title=model.title)
 
 
-def get_nshm_model(version: Optional[str] = None) -> Optional[NshmModel]:
+def get_nshm_model(version: str | None = None) -> NshmModel | None:
     # model = nm.get_model_version(version)
     model = nm.get_model_version(version) if version else nm.get_model_version()
     return NshmModel(version=model.version, title=model.title) if model else None
