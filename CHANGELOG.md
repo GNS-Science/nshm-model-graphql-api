@@ -4,9 +4,8 @@
 ## [unreleased]
 
 ### Changed
- - deps: patch upgrades (botocore, pydantic, pydantic-core, ruff, uv, authlib, boto3); includes security fix authlib GHSA-jj8c-mmj3-mmgv
- - deps: skipped lxml 6.1.0 and safety-schemas 0.0.18 (< 1 week old)
- - deps(yarn): minor (serverless 4.29.0→4.34.0 fixes CVE-1111771, serverless-plugin-warmup 8.3.0→8.4.1)
+ - migrated form poetry to uv
+ - dependency upgrades
 
 ## [0.4.0] - 2025-10-20
 
