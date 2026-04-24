@@ -1,6 +1,12 @@
 # Changelog
 
 
+## [unreleased]
+
+### Changed
+ - deps: patch upgrades (botocore, pydantic, pydantic-core, ruff, uv, authlib, boto3); includes security fix authlib GHSA-jj8c-mmj3-mmgv
+ - deps: skipped lxml 6.1.0 and safety-schemas 0.0.18 (< 1 week old)
+
 ## [0.4.0] - 2025-10-20
 
 ### Changed
