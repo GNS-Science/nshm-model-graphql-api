@@ -16,21 +16,19 @@ def client():
 )
 def test_get_model_as_node(client, version):
     QUERY = """
-    query {
-        node(id: "%s")
-        {
-            ... on Node {
+    query {{
+        node(id: "{}")
+        {{
+            ... on Node {{
                 id
-            }
-            ... on NshmModel {
+            }}
+            ... on NshmModel {{
                 version
                 title
-            }
-        }
-    }
-    """ % to_global_id(
-        "NshmModel", version
-    )
+            }}
+        }}
+    }}
+    """.format(to_global_id("NshmModel", version))
     executed = client.execute(QUERY)
     print(executed)
     assert executed["data"]["node"]["version"] == version

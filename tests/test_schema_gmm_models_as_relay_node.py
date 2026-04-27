@@ -16,27 +16,23 @@ def client():
 )
 def test_get_model_SourceLogicTree_as_node(client, model_version):
     QUERY = """
-    query {
-        node(id: "%s")
-        {
-            ... on Node {
+    query {{
+        node(id: "{}")
+        {{
+            ... on Node {{
                 id
-            }
-            ... on GroundMotionModelLogicTree {
+            }}
+            ... on GroundMotionModelLogicTree {{
                 model_version
-            }
-        }
-    }
-    """ % to_global_id(
-        "GroundMotionModelLogicTree", model_version
-    )
+            }}
+        }}
+    }}
+    """.format(to_global_id("GroundMotionModelLogicTree", model_version))
     print(QUERY)
     executed = client.execute(QUERY)
     print(executed)
     assert executed["data"]["node"]["model_version"] == model_version
-    assert executed["data"]["node"]["id"] == to_global_id(
-        "GroundMotionModelLogicTree", model_version
-    )
+    assert executed["data"]["node"]["id"] == to_global_id("GroundMotionModelLogicTree", model_version)
 
 
 @pytest.mark.parametrize(
@@ -50,32 +46,28 @@ def test_get_model_SourceLogicTree_as_node(client, model_version):
 )
 def test_get_model_GmmBranchSet_as_node(client, model_version, short_name, long_name):
     QUERY = """
-    query {
-        node(id: "%s")
-        {
-            ... on Node {
+    query {{
+        node(id: "{}")
+        {{
+            ... on Node {{
                 id
-            }
-            ... on GmmBranchSet {
+            }}
+            ... on GmmBranchSet {{
                 model_version
                 short_name
                 long_name
                 tectonic_region_type
-            }
+            }}
 
-        }
-    }
-    """ % to_global_id(
-        "GmmBranchSet", f"{model_version}:{short_name}"
-    )
+        }}
+    }}
+    """.format(to_global_id("GmmBranchSet", f"{model_version}:{short_name}"))
     executed = client.execute(QUERY)
     print(executed)
     assert executed["data"]["node"]["model_version"] == model_version
     assert executed["data"]["node"]["short_name"] == short_name
     assert executed["data"]["node"]["long_name"] == long_name
-    assert executed["data"]["node"]["id"] == to_global_id(
-        "GmmBranchSet", f"{model_version}:{short_name}"
-    )
+    assert executed["data"]["node"]["id"] == to_global_id("GmmBranchSet", f"{model_version}:{short_name}")
 
 
 @pytest.mark.parametrize(
@@ -101,25 +93,27 @@ def test_get_model_GmmLogicTreeBranch_as_node(
     client, model_version, branch_set_short_name, gsim_name, gsim_args, weight
 ):
     QUERY = """
-    query {
-        node(id: "%s")
-        {
-            ... on Node {
+    query {{
+        node(id: "{}")
+        {{
+            ... on Node {{
                 id
-            }
-            ... on GmmLogicTreeBranch {
+            }}
+            ... on GmmLogicTreeBranch {{
                 model_version
                 branch_set_short_name
                 gsim_name
                 gsim_args
                 weight
-            }
+            }}
 
-        }
-    }
-    """ % to_global_id(
-        "GmmLogicTreeBranch",
-        f"{model_version}|{branch_set_short_name}|{gsim_name}|{gsim_args}",
+        }}
+    }}
+    """.format(
+        to_global_id(
+            "GmmLogicTreeBranch",
+            f"{model_version}|{branch_set_short_name}|{gsim_name}|{gsim_args}",
+        )
     )
     executed = client.execute(QUERY)
     print(executed)

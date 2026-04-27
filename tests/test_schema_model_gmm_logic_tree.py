@@ -18,28 +18,25 @@ def client():
     ["NSHM_v1.0.0", "NSHM_v1.0.4"],
 )
 def test_get_model_and_branch_sets(client, model_version):
-    QUERY = (
-        """
-        query {
-            get_model(version: "%s")
-            {
-                gmm_logic_tree {
-                    branch_sets {
+    QUERY = f"""
+        query {{
+            get_model(version: "{model_version}")
+            {{
+                gmm_logic_tree {{
+                    branch_sets {{
                         __typename
                         model_version
                         short_name
                         long_name
                         tectonic_region_type
-                    }
-                }
-                ... on Node {
+                    }}
+                }}
+                ... on Node {{
                     id
-                }
-            }
-        }
+                }}
+            }}
+        }}
     """
-        % model_version
-    )
     executed = client.execute(QUERY)
     print(executed)
     branch_sets = executed["data"]["get_model"]["gmm_logic_tree"]["branch_sets"]
@@ -58,32 +55,29 @@ def test_get_model_and_branch_sets(client, model_version):
     ],
 )
 def test_get_model_and_branch_set_branches(client, model_version):
-    QUERY = (
-        """
-        query {
-            get_model(version: "%s")
-            {
-                gmm_logic_tree {
-                    branch_sets {
+    QUERY = f"""
+        query {{
+            get_model(version: "{model_version}")
+            {{
+                gmm_logic_tree {{
+                    branch_sets {{
                         # short_name
-                        branches {
+                        branches {{
                             __typename
                             branch_set_short_name
                             model_version
                             weight
                             gsim_name
                             gsim_args
-                        }
-                    }
-                }
-                ... on Node {
+                        }}
+                    }}
+                }}
+                ... on Node {{
                     id
-                }
-            }
-        }
+                }}
+            }}
+        }}
     """
-        % model_version
-    )
     executed = client.execute(QUERY)
     print(executed)
     branch_sets = executed["data"]["get_model"]["gmm_logic_tree"]["branch_sets"]
@@ -92,7 +86,5 @@ def test_get_model_and_branch_set_branches(client, model_version):
     assert branch_sets[0]["branches"][0]["weight"] <= 1.0
     assert branch_sets[0]["branches"][0]["branch_set_short_name"] == "CRU"
     assert branch_sets[0]["branches"][0]["gsim_name"] == "Stafford2022"
-    assert branch_sets[0]["branches"][0]["gsim_args"] == json.dumps(
-        {"mu_branch": "Upper"}
-    )
+    assert branch_sets[0]["branches"][0]["gsim_args"] == json.dumps({"mu_branch": "Upper"})
     assert branch_sets[0]["branches"][0]["model_version"] == model_version

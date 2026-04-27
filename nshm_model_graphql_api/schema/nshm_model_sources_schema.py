@@ -81,9 +81,7 @@ class SourceLogicTreeBranch(graphene.ObjectType):
     @staticmethod
     def resolve_sources(root, info, **kwargs):
         log.info(f"resolve SourceLogicTreeBranch.sources root: {root} kwargs: {kwargs}")
-        ltb = get_logic_tree_branch(
-            root.model_version, root.branch_set_short_name, root.tag
-        )
+        ltb = get_logic_tree_branch(root.model_version, root.branch_set_short_name, root.tag)
         for src in ltb.sources:
             if isinstance(src, logic_tree.InversionSource):
                 # print(src)
@@ -97,13 +95,10 @@ class SourceLogicTreeBranch(graphene.ObjectType):
             elif isinstance(src, logic_tree.DistributedSource):
                 yield BranchDistributedSource(nrml_id=src.nrml_id)
             else:
-                raise RuntimeError(
-                    f"got unknown source type :{src}"
-                )  # pragma: no cover
+                raise RuntimeError(f"got unknown source type :{src}")  # pragma: no cover
 
 
 class SourceBranchSet(graphene.ObjectType):
-
     class Meta:
         interfaces = (relay.Node,)
 
@@ -119,9 +114,7 @@ class SourceBranchSet(graphene.ObjectType):
     def get_node(cls, info, node_id: str):
         model_version, short_name = node_id.split(":")
         bs = get_branch_set(model_version, short_name)
-        return SourceBranchSet(
-            model_version=model_version, short_name=short_name, long_name=bs.long_name
-        )
+        return SourceBranchSet(model_version=model_version, short_name=short_name, long_name=bs.long_name)
 
     @staticmethod
     def resolve_branches(root, info, **kwargs):
