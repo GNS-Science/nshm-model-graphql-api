@@ -6,6 +6,7 @@
 ### Changed
  - migrated form poetry to uv
  - dependency upgrades
+ - deps: patch (brace-expansion 2.0.2→2.1.0, lodash 4.17.21→4.18.1, minimatch 9.0.5→9.0.9), minor (glob 10.4.5→10.5.0)
 
 ## [0.4.0] - 2025-10-20
 
