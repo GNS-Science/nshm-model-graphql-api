@@ -24,9 +24,7 @@ def test_get_models(client):
     print(executed)
     assert executed["data"]["get_models"][0]["version"] == "NSHM_v1.0.0"
     assert executed["data"]["get_models"][0]["title"] == "Initial version"
-    assert executed["data"]["get_models"][0]["id"] == to_global_id(
-        "NshmModel", "NSHM_v1.0.0"
-    )
+    assert executed["data"]["get_models"][0]["id"] == to_global_id("NshmModel", "NSHM_v1.0.0")
 
 
 def test_get_model_default(client):
@@ -48,21 +46,18 @@ def test_get_model_default(client):
     ["NSHM_v1.0.0", "NSHM_v1.0.4"],
 )
 def test_get_model(client, model_version):
-    QUERY = (
-        """
-    query {
-        get_model(version: "%s")
-        {
+    QUERY = f"""
+    query {{
+        get_model(version: "{model_version}")
+        {{
             __typename
             version
-            ... on Node {
+            ... on Node {{
                 id
-            }
-        }
-    }
+            }}
+        }}
+    }}
     """
-        % model_version
-    )
     executed = client.execute(QUERY)
     print(executed)
     assert executed["data"]["get_model"]["version"] == model_version

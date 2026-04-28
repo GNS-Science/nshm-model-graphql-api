@@ -115,6 +115,9 @@ ENV/
 # mkdocs build dir
 site/
 
+
 node_modules
 .yarn/install-state.gz
 .claude/settings.local.json
+.pnp.cjs
+.pnp.loader.mjs

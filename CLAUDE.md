@@ -9,19 +9,18 @@ A GraphQL API exposing New Zealand Seismic Hazard Model (NSHM) data via AWS Lamb
 ```bash
 # Install dependencies
 yarn install
-poetry install
+uv sync --all-groups
 
 # Run tests
-poetry run pytest
-poetry run pytest tests/test_schema_models.py          # single test file
-poetry run pytest tests/test_schema_models.py::test_fn  # single test function
-poetry run pytest --cov                                 # with coverage
+uv run pytest
+uv run pytest tests/test_schema_models.py          # single test file
+uv run pytest tests/test_schema_models.py::test_fn  # single test function
+uv run pytest --cov                                 # with coverage
 
 # Lint & format
-poetry run black nshm_model_graphql_api tests
-poetry run isort nshm_model_graphql_api tests
-poetry run flake8 nshm_model_graphql_api tests
-poetry run mypy nshm_model_graphql_api tests
+uv run ruff format nshm_model_graphql_api tests
+uv run ruff check nshm_model_graphql_api tests
+uv run mypy nshm_model_graphql_api tests
 
 # Full CI suite via tox
 tox                    # all environments: audit, py312, format, lint, build
@@ -29,10 +28,10 @@ tox -e py312           # tests only
 tox -e lint            # lint only
 
 # Local dev server (port 5000)
-ENABLE_METRICS=0 poetry run yarn sls wsgi serve
+ENABLE_METRICS=0 uv run yarn sls wsgi serve
 
 # Deploy
-AWS_PROFILE=<profile> poetry run yarn sls deploy --region ap-southeast-2 --stage dev
+AWS_PROFILE=<profile> uv run yarn sls deploy --region ap-southeast-2 --stage dev
 ```
 
 ## Architecture
@@ -62,13 +61,13 @@ Serverless Framework v4 deploys to AWS Lambda (Python 3.12, 2048MB, 10s timeout)
 ## Tech Stack
 
 - **Runtime**: Python 3.12, Node 22 (for Serverless CLI)
-- **Package managers**: Poetry (Python), Yarn v4 (Node)
+- **Package managers**: uv (Python), Yarn v4 (Node)
 - **Testing**: pytest with Graphene test Client
 - **CI/CD**: GitHub Actions (`.github/workflows/`) — tests on PR, deploy on merge to main
 - **Version management**: bump2version syncs version across `pyproject.toml`, `package.json`, `__init__.py`
 
 ## Configuration
 
-- `pyproject.toml` — Poetry dependencies and project metadata
-- `setup.cfg` — pytest, coverage, flake8, mypy, tox, isort settings
+- `pyproject.toml` — uv dependencies, project metadata, ruff, mypy config
+- `setup.cfg` — pytest, coverage, tox settings
 - `.bumpversion.cfg` — version bump targets

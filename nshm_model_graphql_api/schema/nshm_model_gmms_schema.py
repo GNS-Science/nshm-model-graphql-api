@@ -26,16 +26,12 @@ def get_branch_set(model_version, short_name):
 # TODO: this method belongs on the nzshm-model gmcm class
 @lru_cache
 def get_logic_tree_branch(model_version, branch_set_short_name, gsim_name, gsim_args):
-    log.info(
-        f"get_logic_tree_branch: {branch_set_short_name} gsim_name: {gsim_name} gsim_args: {gsim_args}"
-    )
+    log.info(f"get_logic_tree_branch: {branch_set_short_name} gsim_name: {gsim_name} gsim_args: {gsim_args}")
     branch_set = get_branch_set(model_version, branch_set_short_name)
     for ltb in branch_set.branches:
         if (ltb.gsim_name == gsim_name) and (ltb.gsim_args == json.loads(gsim_args)):
             return ltb
-    assert (
-        0
-    ), f"branch with gsim_name: {gsim_name} gsim_args: {gsim_args} was not found"  # pragma: no cover
+    assert 0, f"branch with gsim_name: {gsim_name} gsim_args: {gsim_args} was not found"  # pragma: no cover
 
 
 class GmmLogicTreeBranch(graphene.ObjectType):
@@ -55,9 +51,7 @@ class GmmLogicTreeBranch(graphene.ObjectType):
     @classmethod
     def get_node(cls, info, node_id: str):
         model_version, branch_set_short_name, gsim_name, gsim_args = node_id.split("|")
-        gltb = get_logic_tree_branch(
-            model_version, branch_set_short_name, gsim_name, gsim_args
-        )
+        gltb = get_logic_tree_branch(model_version, branch_set_short_name, gsim_name, gsim_args)
         return GmmLogicTreeBranch(
             model_version=model_version,
             branch_set_short_name=branch_set_short_name,
