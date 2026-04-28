@@ -4,7 +4,7 @@
 ## [unreleased]
 
 ### Changed
- - migrated form poetry to uv
+ - migrated from poetry to uv
  - dependency upgrades
 
 ## [0.4.0] - 2025-10-20
