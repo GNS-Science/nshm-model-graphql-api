@@ -8,7 +8,7 @@
 - **Owner:** Chris B Chamberlain (chrisbc@artisan.co.nz)
 - **Migration branch:** `migrate/strawberry` (based on `deploy-test`)
 - **Started:** 2026-06-22
-- **Status:** Phase 0 — Pre-flight (in progress)
+- **Status:** Phase 0 — Pre-flight ✅ complete (2026-06-22); next: Phase 1 bootstrap
 - **Why this one first** (runbook §A1): smallest (~7 .py files), zip Lambda, no DynamoDB writes, no auth, minimal external integrations — lowest blast radius. The heavy `nzshm-model` library stays untouched.
 
 ---
@@ -62,6 +62,10 @@ Captured up front so the plan is grounded in what actually exists. Source: code 
 - **Auth:** API Gateway **API key** only (`TempApiKey-${stack_name}`), `private: true` on the POST route; GET (GraphiQL) public. **No `LEGACY_API_KEY` / `x-api-key` env chain** in this repo → runbook §4.3 trap is N/A (the auth contract here is the API-Gateway key, preserve that).
 - `provider.environment`: `REGION`, `DEPLOYMENT_STAGE`; function env `STACK_NAME`. IAM: single `cloudwatch:PutMetricData` allow.
 - **Routes to preserve:** `POST /graphql` (private), `GET /graphql`, `GET /graphql/{proxy+}`, `OPTIONS /graphql`, `GET /static/{proxy+}`.
+- **Secrets / environments (⚠️ delta from runbook §4.2):** this repo does **NOT** use the `AWS_TEST` / `AWS_PROD` GitHub Environments the runbook assumes. Instead:
+  - **Repo-level secrets:** `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` (static keys, created 2024-06), `SERVERLESS_ACCESS_KEY`, `CODECOV_TOKEN`, `SCHEDULED_GITHUB_SLACK_WEBHOOK`.
+  - **One environment, `DEPLOY_TEST`, with no environment-level secrets.** Deploy auth resolves from the repo-level static AWS keys + `SERVERLESS_ACCESS_KEY`.
+  - Implication: no OIDC role / per-env secret split to preserve. If migrating toward the runbook's posture is desired, that's a separate hardening task — out of scope for the code migration. Capture as runbook feedback (the four siblings may not share the AWS_TEST/AWS_PROD assumption).
 - CI uses **shared reusable workflows** from `GNS-Science/nshm-github-actions`:
   - `dev.yml` — tests; trigger `pull_request: branches: [main, deploy-test]` (⚠️ runbook Trap #14 — this `branches:` filter silently skips CI on stacked PRs; remove it).
   - `deploy-to-aws.yaml` — push to `deploy-test` or `main`; runs tests then deploys (Node 22 / Yarn; smoke query `query QueryRoot{about}`).
@@ -103,10 +107,10 @@ Captured up front so the plan is grounded in what actually exists. Source: code 
 
 > Full detail in the runbook. This is the repo-specific tracking list — tick as completed and append a dated note under "Log entries" for each.
 
-### Phase 0 — Pre-flight
-- [ ] Dump legacy Graphene SDL → `schema.legacy.graphql`, commit as parity target
-- [ ] Vendor a client query corpus (start from the test queries; chase real `runzi`/frontend queries) into `tests/fixtures/`
-- [ ] Confirm secrets: `gh secret list --env AWS_TEST` / `--env AWS_PROD`
+### Phase 0 — Pre-flight ✅
+- [x] Dump legacy Graphene SDL → `schema.legacy.graphql` (116 lines; tool: `nshm_model_graphql_api/tools/dump_legacy_sdl.py`), committed as parity target
+- [x] Seed a client query corpus in `tests/fixtures/corpus/` (6 queries, all validate against legacy schema) — ⚠️ still need to chase **real** `runzi`/frontend queries (see corpus README)
+- [x] Inventory secrets — found repo-level static AWS keys + `DEPLOY_TEST` env (NOT `AWS_TEST`/`AWS_PROD`); see delta note above
 
 ### Phase 1 — Bootstrap (zip Lambda)
 - [ ] Add deps: `strawberry-graphql>=0.243`, `fastapi>=0.115`, `mangum>=0.18`, `pydantic>=2`; `uv lock && uv sync`
@@ -146,5 +150,15 @@ Captured up front so the plan is grounded in what actually exists. Source: code 
 - Created branch `migrate/strawberry` off `deploy-test`.
 - Created this log; captured Phase 0 inventory and runbook deltas above.
 - **Next:** Phase 0 — dump legacy SDL + vendor query corpus.
+
+### 2026-06-22 — Phase 0 complete
+- Added `nshm_model_graphql_api/tools/dump_legacy_sdl.py`; committed `schema.legacy.graphql` (116 lines) as the parity target.
+- Seeded `tests/fixtures/corpus/` with 6 queries (smoke `{about}`, root info, get_models, source tree w/ `BranchSource` union, gmm tree w/ `gsim_args`, Relay `node` lookup). All validate against the legacy schema.
+- Inventoried secrets/environments → recorded the `AWS_TEST`/`AWS_PROD` delta (this repo uses repo-level static keys + a `DEPLOY_TEST` env).
+- Baseline test suite green: **39 passed**.
+- **Runbook feedback candidates (file against `nshm-toshi-api`):**
+  1. *New trap:* the SDL-dump import path can print dependency warnings to **stdout** (here `nzshm-model` emits `WARNING: optional 'toshi' dependencies are not installed`), polluting `schema.legacy.graphql`. Fix: redirect stdout→stderr around the schema import (see `dump_legacy_sdl.py`). Runbook's Phase 0 snippet (`print(str(schema))`) doesn't guard this.
+  2. *Phase 0 / §4.2 clarification:* secrets may **not** follow the `AWS_TEST`/`AWS_PROD` Environments pattern — Model uses repo-level static AWS keys + a single `DEPLOY_TEST` env. Runbook should not assume the OIDC/per-env split universally.
+- **Next:** Phase 1 — add `strawberry-graphql`/`fastapi`/`mangum`/`pydantic`, create `app.py` + `schema.py`, swap `serverless.yml` handler, verify boot.
 
 <!-- Append new dated entries above this line as the migration proceeds. -->
