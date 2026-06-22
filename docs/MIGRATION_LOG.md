@@ -195,4 +195,11 @@ Investigated whether `nzshm-model` (v0.15.0) exposes a schema we could import/ex
 - **Decision:** hand-write the 7 Strawberry types as thin projections whose resolvers read the nzshm-model dataclasses (mirrors the legacy graphene code, preserves parity). Import the dataclasses for resolver type-hints; **skip building a separate pydantic data layer** — the upstream dataclasses already are it.
 - **Runbook feedback candidate:** Phase 2's "keep DynamoDB shapes in `data/models.py` as pydantic BaseModel" assumes you own the data layer. When the upstream library already provides typed dataclasses (Model's case — and likely Solvis's PynamoDB→? path differs), reuse them rather than mirroring into pydantic.
 
+### 2026-06-22 — Q&A: would pydantic upstream have changed the approach?
+Considered whether the migration would differ if `nzshm-model` exposed pydantic models instead of dataclasses.
+- **Marginally.** Strawberry has `strawberry.experimental.pydantic.type` (no dataclass equivalent) → could auto-generate types with explicit field selection (clean subset exposure + free validation). Dataclasses give no such hook → hand-write.
+- **But the hard parts are data-layer-agnostic:** injected fields (`model_version`, `branch_set_short_name`), transforms (`gsim_args` JSON, `tag`/`tectonic_region_type` from `@property`), Relay composite IDs, the union, `auto_camel_case=False`/nullability parity — all still custom regardless.
+- **Telling signal:** toshi-api *had* pydantic and deliberately did NOT use `experimental.pydantic` — kept pydantic in the data layer and hand-wrote Strawberry types + `from_dict` (integration is experimental + sharp edges with `strawberry.lazy`/cyclic types, which this schema has; and keeps data migrations isolated from schema migrations).
+- **Conclusion:** approach is identical either way for this API — hand-written thin projection types over a typed data layer. Validation buys little (read-only data; `dacite` already validates). Decision unchanged.
+
 <!-- Append new dated entries above this line as the migration proceeds. -->
