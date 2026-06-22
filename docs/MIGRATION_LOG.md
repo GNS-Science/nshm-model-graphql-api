@@ -8,7 +8,7 @@
 - **Owner:** Chris B Chamberlain (chrisbc@artisan.co.nz)
 - **Migration branch:** `migrate/strawberry` (based on `deploy-test`)
 - **Started:** 2026-06-22
-- **Status:** Phase 1 — Bootstrap ✅ complete (2026-06-22); next: Phase 2 schema migration
+- **Status:** Phase 2 — Schema migration ✅ complete (2026-06-22); next: Phase 3 test infrastructure
 - **Why this one first** (runbook §A1): smallest (~7 .py files), zip Lambda, no DynamoDB writes, no auth, minimal external integrations — lowest blast radius. The heavy `nzshm-model` library stays untouched.
 
 ---
@@ -119,12 +119,14 @@ Captured up front so the plan is grounded in what actually exists. Source: code 
 - [x] `serverless.yml` — `plugins: []` (dropped `serverless-wsgi`); removed `custom.wsgi`; handler → `nshm_model_graphql_api.app.handler`; memory 2048 → 1024
 - [x] Verify boot: HTTP `TestClient` POST `/graphql` → 200 + correct data; GET `/graphql` → GraphiQL. SDL snake_case confirmed (`current_model_version`, not camelCase). ruff/mypy clean; 39 tests still pass.
 
-### Phase 2 — Schema migration (the 7 types)
-- [ ] `NshmModel` + root `Query` (`get_models`, `get_model`, `about`, `version`, `current_model_version`, `node`)
-- [ ] Source tree: `SourceLogicTree` → `SourceBranchSet` → `SourceLogicTreeBranch` + `BranchSource` union
-- [ ] GMM tree: `GroundMotionModelLogicTree` → `GmmBranchSet` → `GmmLogicTreeBranch`
-- [ ] Relay `Node` via `strawberry.relay`; preserve every composite-ID delimiter scheme above
-- [ ] `gsim_args` JSON scalar parity; `strawberry.lazy` for any forward refs
+### Phase 2 — Schema migration (the 7 types) ✅
+- [x] `nshm_model_graphql_api/data.py` — graphene-free data layer over nzshm-model dataclasses (mirrors legacy helpers)
+- [x] `NshmModel` + root `QueryRoot` (`get_models`, `get_model`, `about`, `version`, `current_model_version`, `node`)
+- [x] Source tree: `SourceLogicTree` → `SourceBranchSet` → `SourceLogicTreeBranch` + `BranchSource` union (both members)
+- [x] GMM tree: `GroundMotionModelLogicTree` → `GmmBranchSet` → `GmmLogicTreeBranch`
+- [x] **Custom** `Node` interface (NOT `strawberry.relay`) — keeps `id: ID!` + exact `graphql_relay` base64 encoding; per-type composite-ID schemes + `node()` dispatch table preserved
+- [x] `gsim_args` `JSONString` scalar parity (custom strawberry scalar, json.dumps/loads, exact description)
+- [x] **SDL parity ✅ + runtime parity ✅** vs legacy (see below); ruff/mypy clean; 39 legacy tests still pass
 
 ### Phase 3 — Tests
 - [ ] Port `graphene.test.Client` → Strawberry test client (add `conftest.py` with a shared fixture)
@@ -201,5 +203,18 @@ Considered whether the migration would differ if `nzshm-model` exposed pydantic 
 - **But the hard parts are data-layer-agnostic:** injected fields (`model_version`, `branch_set_short_name`), transforms (`gsim_args` JSON, `tag`/`tectonic_region_type` from `@property`), Relay composite IDs, the union, `auto_camel_case=False`/nullability parity — all still custom regardless.
 - **Telling signal:** toshi-api *had* pydantic and deliberately did NOT use `experimental.pydantic` — kept pydantic in the data layer and hand-wrote Strawberry types + `from_dict` (integration is experimental + sharp edges with `strawberry.lazy`/cyclic types, which this schema has; and keeps data migrations isolated from schema migrations).
 - **Conclusion:** approach is identical either way for this API — hand-written thin projection types over a typed data layer. Validation buys little (read-only data; `dacite` already validates). Decision unchanged.
+
+### 2026-06-22 — Phase 2 complete (schema migration)
+Ported all 7 types + union + JSONString scalar + root query to Strawberry, at strict parity.
+- **New files:** `data.py` (data layer over nzshm-model dataclasses), `tools/schema_parity.py` (order-insensitive SDL parity gate). `strawberry_schema.py` is now the full schema; `app.py` already serves it.
+- **SDL parity = byte-identical** to `schema.legacy.graphql` (compared via `lexicographic_sort_schema` → `print_schema`, so order is ignored but any field/type/nullability/description change fails). `uv run python -m nshm_model_graphql_api.tools.schema_parity` → ✅.
+- **Runtime parity = byte-identical** output between legacy graphene and new strawberry for all corpus queries (incl. the real weka query) **and** `node(id)` round-trips for all 7 node types — global-id base64 encodings match exactly.
+- **Key decisions / surprises (runbook feedback candidates):**
+  1. **Used a custom `Node` interface, not `strawberry.relay`.** Strawberry's relay emits a `GlobalID` scalar and `id: GlobalID!`, which breaks SDL parity (`id: ID!`) and could change the wire id. A custom `@strawberry.interface Node` with `id: strawberry.ID` + `graphql_relay.to_global_id/from_global_id` reproduces graphene exactly. *(Runbook Phase 2 shows `relay.Node`/`relay.NodeID` — note the GlobalID-vs-ID parity gotcha for any API migrating an existing graphene relay schema. Composite IDs from multiple fields also don't fit `relay.NodeID[str]` cleanly.)*
+  2. **`Optional[x] = None` args render as `arg: T = null`;** legacy graphene emits `arg: T`. Use `strawberry.UNSET` as the default to suppress it (fixed `get_model(version)`).
+  3. **Output `-> str` becomes `String!`;** must annotate `-> str | None` to match graphene's nullable defaults (applies to every field — done).
+  4. Custom scalar (`JSONString`) trips mypy `valid-type`; one `# type: ignore[valid-type]`. Global-id args typed `str | None` → coerce via f-string (matches graphql_relay's own f-string coercion) to satisfy mypy without changing output.
+  5. Added `graphql-relay>=3.2` as an explicit dep (was transitive via graphene) so id encoding survives graphene removal at cutover.
+- **Next:** Phase 3 — port the test suite to the Strawberry schema (currently tests target legacy `schema_root`), wire `tools/schema_parity.py` + corpus replay into CI.
 
 <!-- Append new dated entries above this line as the migration proceeds. -->
