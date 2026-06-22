@@ -50,61 +50,71 @@ gh pr create --base main --head revert/strawberry-promote --draft \
 
 ### Trigger criteria (decide the numbers before promote; fill in)
 Publish the rollback if **any** of:
-- Smoke replay (§2) fails on the deployed stage (any corpus query errors / shape mismatch), **or**
-- Prod **5xx rate > `__%` sustained > `__ min`** (CloudWatch `5XXError`), **or**
-- p95 `Duration` regresses **> `__×`** vs the pre-deploy baseline (capture it — runbook Trap #22), **or**
-- Any unhandled exception in `aws logs tail /aws/lambda/<fn-name>` within the first 30 min that affects real client queries.
+- The differential live driver (§2) reports **any mismatch** vs the local oracle (or any HTTP/GraphQL error), **or**
+- The manual weka exercise (§3) shows a broken Logic Tree view, **or**
+- Any unhandled exception in `aws logs tail /aws/lambda/<fn-name>` within the first 30 min.
+
+> Metric-based triggers (5xx rate, p95 regression) are **not primary here** — traffic
+> is too low to produce a meaningful baseline. The differential driver is the signal.
 
 > Forward-port rule (runbook §4.11): any hotfix to `main` MUST be cherry-picked
 > back to `deploy-test` the same day, and vice-versa.
 
 ---
 
-## 2. Smoke
+## 2. Validation — differential live driver (primary)
 
-The deploy workflow already runs a one-shot smoke query (`query QueryRoot{about}`).
-For real coverage, replay the **whole vendored corpus** against the deployed stage —
-this is the runtime check that SDL parity can't give (runbook Trap #1):
+**Why not a soak:** Model has almost no organic traffic, so a passive soak + CloudWatch
+baseline gives no signal. Instead we **actively drive** queries at the deployed `/graphql`
+and compare each response **byte-for-byte against the in-process Strawberry schema** (the
+oracle, proven identical to legacy — `tests/test_schema_parity.py`). Any difference is
+something the *deploy* introduced (packaging, serialization, env, cold-start data load).
 
 ```bash
 # capture the deployed URL + API key from the deploy run output (the TempApiKey-* line)
-uv run python tests/smoke/replay_corpus.py --url <stage-graphql-url> --api-key <key>
-# or: SMOKE_URL=... SMOKE_API_KEY=... uv run python tests/smoke/replay_corpus.py
+uv run python tests/smoke/drive_live.py --url <stage-graphql-url> --api-key <key>
+# or: SMOKE_URL=<stage-graphql-url> SMOKE_API_KEY=<key> uv run python tests/smoke/drive_live.py
 ```
-Every query (incl. the real weka `LogicTreePageQuery`) must return HTTP 200 with no
-GraphQL `errors`. This is the **rollback trigger** referenced in §1: any failure here
-on prod → publish the draft revert PR.
+
+It enumerates (not sampled-from-traffic):
+- the no-variable corpus queries (about, root info, get_models),
+- **every** model version → the full weka tree query,
+- **every** Relay node type, per version → a `node(id)` lookup (ids harvested from the tree).
+
+Exit 0 = every live response matched the oracle. **Any mismatch is the rollback trigger** (§1).
+The deploy workflow's built-in one-shot smoke (`query QueryRoot{about}`) still runs first as
+a liveness gate; this driver is the correctness gate.
 
 ---
 
-## 3. Soak
+## 3. Manual weka exercise + CloudWatch glance (instead of a soak)
 
-1. **Baseline first (before deploying).** Screenshot the legacy Lambda's CloudWatch
-   `Duration` p50/p95/p99, `5XXError` rate, `Invocations`, and `Memory Utilization`
-   over a representative window — this is "healthy" for comparison (runbook Trap #22).
-   Memory matters here: we dropped 2048 → **1024 MB** (P1); confirm utilization leaves
-   headroom or bump back up.
-2. **Deploy to test** (push to `deploy-test`), then run the smoke replay (§2).
-3. **Soak the test stage.** Runbook default is 24h; **Model is the explicit
-   skip-candidate** (very low real traffic). Recommended here: a short soak
-   (a few hours, or until the next real client hit) rather than a full 24h — call it
-   based on observed traffic. Re-run the corpus replay at the end of the soak.
-4. **Watch during soak:** CloudWatch `Duration` (p95 vs baseline), `5XXError`,
-   `Invocations`, `Memory Utilization` (for the 1024 MB call), and
-   `aws logs tail /aws/lambda/<fn-name> --follow` for unhandled exceptions.
+The driver (§2) covers the schema exhaustively but synthetically. Pair it with a
+**real-client check**: point weka at the deployed API and drive the actual UI.
+
+1. Set weka's `VITE_GRAPHQL_ENDPOINT` (+ `VITE_GRAPHQL_API_KEY`) to the deployed stage
+   (test first, prod after promote).
+2. Open the **Logic Tree** view; switch model versions; open the **Source Branches** and
+   **Ground Motion Branches** tabs. This is exactly `LogicTreePageQuery` against the live API.
+3. Eyeball: branch sets/branches render, `gsim_args` shows, no console/network errors.
+
+**CloudWatch is a quick sanity glance, not a baseline/soak** (traffic too low to compare
+metrics meaningfully): after the driver + weka runs, confirm `Errors`/`Throttles` ≈ 0 and
+check one Lambda `REPORT` log line for `Max Memory Used` < 1024 MB (validates the P1
+2048→1024 drop). If memory is tight, bump it back up.
 
 ---
 
 ## 4. Promote & prod watch
 
 1. Promote `deploy-test → main` via PR (title: `release: promote nshm-model-graphql-api to Strawberry`)
-   — only after corpus + smoke + soak pass. Requires review from someone who didn't write the migration.
+   — only after the driver (§2) + weka exercise (§3) pass on **test**. Requires review from
+   someone who didn't write the migration.
 2. **Immediately open the draft revert PR** (§1b) with the promote merge SHA.
-3. **Watch prod ≥ 30 min**, two windows side by side:
-   - `aws logs tail /aws/lambda/<fn-name> --follow --since 1m` — any unhandled exception / 5xx
-   - CloudWatch graph: `Invocations`, `5XXError`, p95 `Duration` vs the §3 baseline
-4. Run the smoke replay (§2) against **prod**.
-5. **"Healthy" call** at 30 min, or **roll back** (§1b) if a trigger fires.
+3. Run the differential driver (§2) against **prod**, then the weka exercise (§3) against prod.
+4. **Watch prod ~30 min:** `aws logs tail /aws/lambda/<fn-name> --follow --since 1m` for any
+   unhandled exception; quick CloudWatch glance that `Errors`/`Throttles` ≈ 0.
+5. **"Healthy" call** once the prod driver run is clean, or **roll back** (§1b) if a trigger fires.
 6. After healthy: at cutover, delete the legacy `schema/` package + Flask app + legacy
    deps (`flask`, `flask-cors`, `graphene`, `graphql-server`) and the `legacy` test
    param; rename `strawberry_schema.py` → `schema.py`.

@@ -147,10 +147,10 @@ Captured up front so the plan is grounded in what actually exists. Source: code 
 - [ ] **Final packaging proof = Phase 5 test-stage deploy** (local `sls package` blocked by SF v4 mandatory AWS account resolution)
 
 ### Phase 5 — Cutover 🟡 (pre-staged; deploy pending)
-- [x] **Pre-staged:** rollback runbook + draft-revert-PR template + trigger criteria, smoke corpus-replay script, soak/promote plan → [`PHASE5_CUTOVER.md`](PHASE5_CUTOVER.md) + `tests/smoke/replay_corpus.py`
-- [ ] Capture legacy CloudWatch baseline (Duration p50/95/99, 5XXError, Invocations, Memory) before deploy
-- [ ] Deploy to `test` stage (push `deploy-test`); run smoke corpus-replay (the real packaging proof); soak
-- [ ] Promote `deploy-test → main`; open draft revert PR with merge SHA; watch prod ≥30 min; smoke prod
+- [x] **Pre-staged:** rollback runbook + draft-revert-PR template + triggers, **differential live driver**, manual-weka + promote plan → [`PHASE5_CUTOVER.md`](PHASE5_CUTOVER.md) + `tests/smoke/drive_live.py`
+- [x] **Strategy: active differential validation, not soak** (traffic too low for a metric baseline). Driver replays enumerated queries (every model version + all 7 node types) at the live `/graphql` and diffs byte-for-byte vs the in-process oracle. Validated in-process (19 checks, 0 mismatches).
+- [ ] Deploy to `test` stage (push `deploy-test`); run `drive_live.py` (the real packaging proof); manual weka exercise
+- [ ] Promote `deploy-test → main`; open draft revert PR with merge SHA; run driver+weka vs prod; ~30-min log watch
 - [ ] Post-healthy cutover cleanup: delete legacy `schema/` + Flask app + legacy deps + `legacy` test param; rename `strawberry_schema.py` → `schema.py`
 
 ---
@@ -250,5 +250,13 @@ Cutover assets prepared on `migrate/strawberry-p5-cutover` (stacked on the deps-
 - `tests/smoke/replay_corpus.py` — replays the full corpus against a live deployed URL+API key (not collected by unit pytest); this is the **real packaging proof** deferred from Phase 4.
 - Vuln-bump deps PR (#68) done earlier today; `pip-audit` clean.
 - **Not yet done (needs AWS creds + go-ahead):** capture baseline, deploy to test, smoke, soak, promote.
+
+### 2026-06-23 — Phase 5 validation strategy pivot (low traffic)
+- Model's traffic is too low for a passive soak / CloudWatch baseline to mean anything, so swapped the strategy to **active differential validation**:
+  - `tests/smoke/drive_live.py` — drives the live `/graphql` and compares each response **byte-for-byte against the in-process schema oracle** (proven == legacy). Enumerates every model version + a `node(id)` per Relay type per version, plus no-var corpus queries. (Replaces the simpler `replay_corpus.py`.)
+  - **Manual weka exercise** — point weka at the deployed API, drive the Logic Tree view (the real `LogicTreePageQuery`).
+  - CloudWatch demoted to a quick glance (Errors/Throttles ≈ 0; one `Max Memory Used` log line to confirm 1024 MB is enough).
+- Validated the driver in-process via Starlette `TestClient` (local app == oracle): **19 checks, 0 mismatches**. Rollback trigger is now "driver reports any mismatch", not a metric threshold.
+- `PHASE5_CUTOVER.md` §1–§4 updated accordingly.
 
 <!-- Append new dated entries above this line as the migration proceeds. -->
