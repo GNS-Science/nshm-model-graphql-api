@@ -1,0 +1,58 @@
+# client: weka UI — src/views/LogicTree/LogicTreePage.tsx (relay LogicTreePageQuery)
+# REAL production query (relay-compiled text). The single page query that drives
+# the Logic Tree view; the Source/GMM tabs consume its result via props.
+# Exercises nearly the whole schema in one operation: get_model, both logic
+# trees, the BranchSource union (both members), current_model_version, get_models.
+query LogicTreePageQuery($version: String!) {
+  get_model(version: $version) {
+    id
+    version
+    title
+    gmm_logic_tree {
+      id
+      branch_sets {
+        model_version
+        short_name
+        long_name
+        tectonic_region_type
+        branches {
+          gsim_name
+          gsim_args
+          weight
+          id
+        }
+        id
+      }
+    }
+    source_logic_tree {
+      id
+      branch_sets {
+        id
+        short_name
+        long_name
+        branches {
+          tag
+          weight
+          sources {
+            __typename
+            ... on BranchInversionSource {
+              nrml_id
+              inversion_id
+              rupture_set_id
+            }
+            ... on BranchDistributedSource {
+              nrml_id
+            }
+          }
+          id
+        }
+      }
+    }
+  }
+  current_model_version
+  get_models {
+    id
+    version
+    title
+  }
+}
