@@ -12,10 +12,17 @@ license = {text = "AGPL-3.0-or-later"}
 
 dependencies = [
     "boto3>=1.24.57",
+    # --- Strawberry/FastAPI/Mangum stack (migration target) ---
+    "strawberry-graphql>=0.243",
+    "fastapi>=0.115",
+    "mangum>=0.18",
+    "pydantic>=2.0",
+    # --- legacy Graphene/Flask stack (removed at cutover, Phase 5) ---
     "flask>=3.0.3",
     "flask-cors>=6.0",
     "graphene>=3.3",
     "graphql-server==3.0.0b7",
+    # --- data layer / shared ---
     "python-dateutil>=2.8.2",
     "pyyaml>=6.0.1",
     "nzshm-model>=0.14.0",
@@ -24,6 +31,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "bump2version",
+    "httpx>=0.27",
     "moto>=5.1",
     "mypy",
     "pip-audit",
