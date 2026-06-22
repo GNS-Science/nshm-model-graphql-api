@@ -8,7 +8,7 @@
 - **Owner:** Chris B Chamberlain (chrisbc@artisan.co.nz)
 - **Migration branch:** `migrate/strawberry` (based on `deploy-test`)
 - **Started:** 2026-06-22
-- **Status:** Phase 0 — Pre-flight ✅ complete (2026-06-22); next: Phase 1 bootstrap
+- **Status:** Phase 1 — Bootstrap ✅ complete (2026-06-22); next: Phase 2 schema migration
 - **Why this one first** (runbook §A1): smallest (~7 .py files), zip Lambda, no DynamoDB writes, no auth, minimal external integrations — lowest blast radius. The heavy `nzshm-model` library stays untouched.
 
 ---
@@ -112,12 +112,12 @@ Captured up front so the plan is grounded in what actually exists. Source: code 
 - [x] Seed a client query corpus in `tests/fixtures/corpus/` (6 queries, all validate against legacy schema) — ⚠️ still need to chase **real** `runzi`/frontend queries (see corpus README)
 - [x] Inventory secrets — found repo-level static AWS keys + `DEPLOY_TEST` env (NOT `AWS_TEST`/`AWS_PROD`); see delta note above
 
-### Phase 1 — Bootstrap (zip Lambda)
-- [ ] Add deps: `strawberry-graphql>=0.243`, `fastapi>=0.115`, `mangum>=0.18`, `pydantic>=2`; `uv lock && uv sync`
-- [ ] `nshm_model_graphql_api/app.py` — FastAPI + `GraphQLRouter` + `Mangum` handler
-- [ ] `nshm_model_graphql_api/schema.py` — `Schema(query=Query, config=StrawberryConfig(auto_camel_case=False))`
-- [ ] `serverless.yml` — drop `serverless-wsgi` + `custom.wsgi`; handler → `nshm_model_graphql_api.app.handler`; memory 2048 → 1024
-- [ ] Verify boot: `uv run uvicorn nshm_model_graphql_api.app:app --reload` → `{ __typename }`
+### Phase 1 — Bootstrap (zip Lambda) ✅
+- [x] Add deps: `strawberry-graphql` (0.316), `fastapi` (0.137), `mangum` (0.21), `pydantic`, `httpx` (dev); `uv lock && uv sync` (frozen-consistent)
+- [x] `nshm_model_graphql_api/app.py` — FastAPI + `GraphQLRouter` (prefix `/graphql`) + `Mangum` handler
+- [x] `nshm_model_graphql_api/strawberry_schema.py` — `Schema(query=Query, config=StrawberryConfig(auto_camel_case=False))` ⚠️ named `strawberry_schema.py` not `schema.py` (legacy `schema/` **package** still occupies that name; rename at cutover). **Minimal Query only** (scalar root fields) — full type tree is Phase 2.
+- [x] `serverless.yml` — `plugins: []` (dropped `serverless-wsgi`); removed `custom.wsgi`; handler → `nshm_model_graphql_api.app.handler`; memory 2048 → 1024
+- [x] Verify boot: HTTP `TestClient` POST `/graphql` → 200 + correct data; GET `/graphql` → GraphiQL. SDL snake_case confirmed (`current_model_version`, not camelCase). ruff/mypy clean; 39 tests still pass.
 
 ### Phase 2 — Schema migration (the 7 types)
 - [ ] `NshmModel` + root `Query` (`get_models`, `get_model`, `about`, `version`, `current_model_version`, `node`)
@@ -169,5 +169,16 @@ Surveyed the five candidate client repos (weka, kororaa, runzi, toshi-hazard-sto
 - All 7 corpus queries validate against `schema.legacy.graphql`. Full survey table in `tests/fixtures/corpus/README.md`.
 - **Takeaway:** parity on `LogicTreePageQuery` ≈ parity for real external traffic. Re-survey before cutover in case new clients appear.
 - *(Tooling note: Explore subagents are sandboxed to this repo and can't read sibling repos — had to run the cross-repo search directly. zsh doesn't word-split unquoted `$vars`; use `$=var` or pass paths literally to `rg`.)*
+
+### 2026-06-22 — Phase 1 complete
+- Added the Strawberry/FastAPI/Mangum stack to `pyproject.toml` deps (kept legacy Graphene/Flask deps alongside — removed at cutover). `uv.lock` regenerated; `uv sync --frozen` passes.
+- New scaffold: `app.py` (FastAPI + Mangum, `/graphql` preserved) and `strawberry_schema.py` (minimal Query, `auto_camel_case=False`). Legacy Flask/Graphene app untouched and still passing.
+- `serverless.yml`: removed `serverless-wsgi` plugin + `custom.wsgi`, handler → Mangum, memory 2048→1024.
+- Verified end-to-end via FastAPI `TestClient`: POST `/graphql` 200 w/ correct data, GET `/graphql` serves GraphiQL.
+- **Decisions / surprises:**
+  1. Could **not** use `schema.py` (runbook's target name) — the legacy Graphene code lives in a `schema/` **package** that occupies that import path. Used `strawberry_schema.py` during transition; rename to `schema.py` at cutover once `schema/` is deleted. *(Runbook feedback: the `<pkg>/schema.py` instruction assumes the legacy schema isn't already a package named `schema`.)*
+  2. Strawberry defaults output fields from `-> str` to **non-null** (`String!`); legacy graphene `String` is **nullable**. Annotated scalar resolvers `-> str | None` to match legacy SDL exactly (don't tighten the contract mid-migration). Watch this for every Phase 2 field.
+  3. **Deploy packaging open question (Phase 4):** with `serverless-wsgi` gone, confirmed nothing yet validates how Python deps land in the Lambda zip (no `serverless-python-requirements` in `plugins`; `package.json` has `serverless requirements` scripts; SF v4 may package natively). Flagged inline in `serverless.yml`. Not blocking — branch isn't deployed until Phase 5.
+- **Next:** Phase 2 — port the 7 types (`NshmModel`, source tree + `BranchSource` union, gmm tree) and the Relay `Node` interface into `strawberry_schema.py` / a `models/` layout, preserving the per-type composite-ID delimiter schemes and the `gsim_args` JSON scalar.
 
 <!-- Append new dated entries above this line as the migration proceeds. -->
