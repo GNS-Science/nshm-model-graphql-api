@@ -146,9 +146,12 @@ Captured up front so the plan is grounded in what actually exists. Source: code 
 - [ ] **Address vulns — deferred to a separate deps PR after the stack lands** (decision 2026-06-23): `urllib3` 2.6.3→2.7.0, `idna` 3.11→3.15, `lxml` 6.0.4→6.1.0 (6 advisories, all transitive)
 - [ ] **Final packaging proof = Phase 5 test-stage deploy** (local `sls package` blocked by SF v4 mandatory AWS account resolution)
 
-### Phase 5 — Cutover
-- [ ] Deploy to `test` stage from `deploy-test`; run corpus + smoke (`{about}`)
-- [ ] Pre-stage rollback PR; promote `deploy-test → main`; watch prod 30 min
+### Phase 5 — Cutover 🟡 (pre-staged; deploy pending)
+- [x] **Pre-staged:** rollback runbook + draft-revert-PR template + trigger criteria, smoke corpus-replay script, soak/promote plan → [`PHASE5_CUTOVER.md`](PHASE5_CUTOVER.md) + `tests/smoke/replay_corpus.py`
+- [ ] Capture legacy CloudWatch baseline (Duration p50/95/99, 5XXError, Invocations, Memory) before deploy
+- [ ] Deploy to `test` stage (push `deploy-test`); run smoke corpus-replay (the real packaging proof); soak
+- [ ] Promote `deploy-test → main`; open draft revert PR with merge SHA; watch prod ≥30 min; smoke prod
+- [ ] Post-healthy cutover cleanup: delete legacy `schema/` + Flask app + legacy deps + `legacy` test param; rename `strawberry_schema.py` → `schema.py`
 
 ---
 
@@ -240,5 +243,12 @@ Ported all 7 types + union + JSONString scalar + root query to Strawberry, at st
 - **Decision to revisit:** `deploy` generates `requirements.txt` explicitly even though the built-in is uv-aware — kept for determinism/portability; if Phase 5 shows the built-in prefers `uv.lock`, drop the generation.
 - 87 tests pass; `yarn install --immutable` clean.
 - **Next:** get approval on the vuln bumps; then Phase 5 — deploy to test stage (the packaging proof), run corpus + smoke, soak, promote.
+
+### 2026-06-23 — Phase 5 pre-staged (deploy still pending)
+Cutover assets prepared on `migrate/strawberry-p5-cutover` (stacked on the deps-bump branch):
+- `docs/PHASE5_CUTOVER.md` — confirms **in-place replacement** (same stack/function/routes/URL; rollback = redeploy previous code), with: §1 rollback (test + prod, draft-revert-PR template, trigger criteria), §2 smoke, §3 soak (baseline + short soak; Model is the soak-skip candidate), §4 promote & 30-min prod watch + post-healthy cleanup list.
+- `tests/smoke/replay_corpus.py` — replays the full corpus against a live deployed URL+API key (not collected by unit pytest); this is the **real packaging proof** deferred from Phase 4.
+- Vuln-bump deps PR (#68) done earlier today; `pip-audit` clean.
+- **Not yet done (needs AWS creds + go-ahead):** capture baseline, deploy to test, smoke, soak, promote.
 
 <!-- Append new dated entries above this line as the migration proceeds. -->
