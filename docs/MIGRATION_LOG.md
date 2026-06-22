@@ -161,4 +161,13 @@ Captured up front so the plan is grounded in what actually exists. Source: code 
   2. *Phase 0 / §4.2 clarification:* secrets may **not** follow the `AWS_TEST`/`AWS_PROD` Environments pattern — Model uses repo-level static AWS keys + a single `DEPLOY_TEST` env. Runbook should not assume the OIDC/per-env split universally.
 - **Next:** Phase 1 — add `strawberry-graphql`/`fastapi`/`mangum`/`pydantic`, create `app.py` + `schema.py`, swap `serverless.yml` handler, verify boot.
 
+### 2026-06-22 — client query survey (Phase 0 corpus hardening)
+Surveyed the five candidate client repos (weka, kororaa, runzi, toshi-hazard-store, solvis-graphql-api) for real queries against this API:
+- **weka is the only GraphQL client.** Vendored its real relay query `LogicTreePageQuery` → `tests/fixtures/corpus/weka__logic_tree_page.graphql` (covers `get_model` + both logic trees + the `BranchSource` union (both members) + `current_model_version` + `get_models` in one op). Endpoint: `…/weka-app-api/graphql` (dev points at the model API on `localhost:5000`).
+- **kororaa** targets the **solvis** fault-model schema (`KORORAA_nzshm_model … source_logic_tree { fault_system_branches }`), not this API.
+- **runzi (7), toshi-hazard-store (4), solvis-graphql-api (4)** all consume the **`nzshm-model` Python library directly** — no GraphQL calls to this API.
+- All 7 corpus queries validate against `schema.legacy.graphql`. Full survey table in `tests/fixtures/corpus/README.md`.
+- **Takeaway:** parity on `LogicTreePageQuery` ≈ parity for real external traffic. Re-survey before cutover in case new clients appear.
+- *(Tooling note: Explore subagents are sandboxed to this repo and can't read sibling repos — had to run the cross-repo search directly. zsh doesn't word-split unquoted `$vars`; use `$=var` or pass paths literally to `rg`.)*
+
 <!-- Append new dated entries above this line as the migration proceeds. -->
