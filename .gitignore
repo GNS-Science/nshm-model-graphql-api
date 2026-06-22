@@ -121,3 +121,5 @@ node_modules
 .claude/settings.local.json
 .pnp.cjs
 .pnp.loader.mjs
+
+.serverless/

@@ -8,8 +8,8 @@
 - **Owner:** Chris B Chamberlain (chrisbc@artisan.co.nz)
 - **Migration branch:** `migrate/strawberry` (based on `deploy-test`)
 - **Started:** 2026-06-22
-- **Status:** Phase 3 — Test infrastructure ✅ complete (2026-06-23); next: Phase 4 deploy/CI/deps hardening
-- **PRs:** stacked, one per phase — #63 (P0), #64 (P1), #65 (P2), #66 (P3). Base chain: `deploy-test` ← P0 ← P1 ← P2 ← P3.
+- **Status:** Phase 4 — Deploy/CI/deps hardening 🟡 in progress (2026-06-23): deploy-packaging resolved; vuln fixes **held** pending approval; real deploy proof deferred to Phase 5.
+- **PRs:** stacked, one per phase — #63 (P0), #64 (P1), #65 (P2), #66 (P3), #67 (P4). Base chain: `deploy-test` ← P0 ← P1 ← P2 ← P3 ← P4.
 - **Why this one first** (runbook §A1): smallest (~7 .py files), zip Lambda, no DynamoDB writes, no auth, minimal external integrations — lowest blast radius. The heavy `nzshm-model` library stays untouched.
 
 ---
@@ -137,11 +137,14 @@ Captured up front so the plan is grounded in what actually exists. Source: code 
 - [x] testcontainers **not needed** (read-only, fully local) — runbook Trap #10 N/A here
 - [x] Parity + corpus run inside `pytest`, so they're already in CI (shared `python-run-tests-uv` workflow); **87 tests pass**
 
-### Phase 4 — Deploy / CI / deps
-- [ ] Remove `branches:` filter in `dev.yml` (Trap #14)
-- [ ] Memory sizing watch (1024 MB → adjust on CloudWatch)
-- [ ] Address Dependabot vulns; `uv sync --frozen` in CI
-- [ ] Confirm API-Gateway key auth unchanged; `/graphql` path preserved
+### Phase 4 — Deploy / CI / deps 🟡
+- [x] Remove `branches:` filter in `dev.yml` (Trap #14) — done in P0
+- [x] **Lambda dep packaging** (the Phase 1 open question) — resolved: SF v4 has **built-in** python-requirements (activated by `custom.pythonRequirements`, uv-aware). `serverless-wsgi` had been doing this; removing it doesn't break packaging. `deploy` script generates `requirements.txt` from uv; `serverless-wsgi` removed from `package.json`.
+- [x] Confirm API-Gateway key auth unchanged + `/graphql` (+ `static`) routes preserved — verified in `serverless.yml`
+- [x] `uv sync --frozen` in CI — handled by shared `python-run-tests-uv` workflow; lock is frozen-consistent
+- [x] Memory 1024 MB set (P1); CloudWatch watch deferred to post-deploy (Phase 5)
+- [ ] **Address vulns — HELD pending approval:** `urllib3` 2.6.3→2.7.0, `idna` 3.11→3.15, `lxml` 6.0.4→6.1.0 (6 advisories, all transitive)
+- [ ] **Final packaging proof = Phase 5 test-stage deploy** (local `sls package` blocked by SF v4 mandatory AWS account resolution)
 
 ### Phase 5 — Cutover
 - [ ] Deploy to `test` stage from `deploy-test`; run corpus + smoke (`{about}`)
@@ -227,5 +230,15 @@ Ported all 7 types + union + JSONString scalar + root query to Strawberry, at st
 - **Phase 3 (this branch, #66 → P2):** parametrized `client` fixture runs the 7 existing schema-test files against **both** schemas; added parity / corpus-replay / HTTP tests. **87 pass**, ruff/mypy clean.
 - **Follow-ups (Phase 4):** (1) `strawberry.scalar(NewType(...))` emits a DeprecationWarning ("use `StrawberryConfig.scalar_map`") — defer; changing it risks the `JSONString` SDL name/description, and CI ignores warnings. (2) `mangum` "no current event loop" warning on import — benign.
 - **Next:** Phase 4 — deploy/CI/deps hardening (validate Lambda dep packaging without serverless-wsgi; Dependabot vulns; memory watch).
+
+### 2026-06-23 — Phase 4 (deploy/CI/deps) — packaging resolved, upgrades held
+- **Biggest finding — Lambda dep packaging.** Inspected the prior `.serverless/` artifact: the deployed zip contained `wsgi_handler.py` + all deps, and a `.serverless/requirements.txt`. So **`serverless-wsgi` (or rather SF's requirements step) packaged the Python deps**, and the package `patterns` (`!**` + `nshm_model_graphql_api/**`) only scope the *source*. The real mechanism: **Serverless Framework v4 ships python-requirements built-in**, activated by the presence of `custom.pythonRequirements` (SF prints this explicitly), and it's **uv-aware**. So removing `serverless-wsgi` does NOT break dep packaging — the built-in still runs. *(This retires the Phase-1 "deploy packaging open question.")*
+- **Changes:** `serverless.yml` plugins emptied (built-in needs no plugin; kept `custom.pythonRequirements` with `dockerizePip`/`slim`/`noDeploy: botocore`); `package.json` `deploy` script now runs `export_requirements` (uv → `requirements.txt`) before `serverless deploy`; removed dead `serverless-wsgi` dep; `.gitignore` += `.serverless/` (`requirements.txt`/`audit.txt` already ignored).
+- **Local validation limit:** `sls package` reaches packaging but SF v4 **always resolves the AWS account ID** (even offline, even without `org`/`app`), so a full local zip build isn't possible without creds. Plugin/config init validated; the built-in python-requirements message confirms it's active. **Definitive proof = Phase 5 test-stage deploy** (the legacy artifact already proves the mechanism).
+- **Auth/routes:** unchanged — API-Gateway key on `POST /graphql` (`private: true`), public GET/GraphiQL, `/graphql` + `/graphql/{proxy+}` + `static/{proxy+}` all preserved. No `LEGACY_API_KEY` chain here (N/A).
+- **Vuln audit (pip-audit, runtime deps): 6 advisories in 3 transitive packages** — `urllib3` 2.6.3→2.7.0 (PYSEC-2026-141/142), `idna` 3.11→3.15 (PYSEC-2026-215), `lxml` 6.0.4→6.1.0 (PYSEC-2026-87). **Upgrades HELD** per instruction — recommend a focused deps-bump (likely a separate PR) once approved.
+- **Decision to revisit:** `deploy` generates `requirements.txt` explicitly even though the built-in is uv-aware — kept for determinism/portability; if Phase 5 shows the built-in prefers `uv.lock`, drop the generation.
+- 87 tests pass; `yarn install --immutable` clean.
+- **Next:** get approval on the vuln bumps; then Phase 5 — deploy to test stage (the packaging proof), run corpus + smoke, soak, promote.
 
 <!-- Append new dated entries above this line as the migration proceeds. -->

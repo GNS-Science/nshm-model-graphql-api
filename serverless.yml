@@ -5,11 +5,11 @@ app: nshm-model-graphql-api
 service: nzshm22-model-graphql-api
 configValidationMode: error
 
-plugins: []
-# serverless-wsgi removed (Strawberry/FastAPI migration). The Lambda handler is
-# now Mangum (nshm_model_graphql_api.app.handler). NOTE (Phase 4): validate how
-# Python deps get packaged into the zip without serverless-wsgi — see the
-# `serverless requirements` scripts in package.json / SF v4 native packaging.
+# serverless-wsgi (which used to package the Python deps) is gone — the handler is now
+# Mangum (nshm_model_graphql_api.app.handler). Python deps are still packaged into the
+# zip by Serverless Framework v4's BUILT-IN python-requirements, which activates from the
+# `custom.pythonRequirements` block below and installs from requirements.txt (generated
+# from uv by the `deploy` script in package.json). No plugin needed.
 
 package:
   individually: false
