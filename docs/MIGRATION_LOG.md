@@ -143,7 +143,7 @@ Captured up front so the plan is grounded in what actually exists. Source: code 
 - [x] Confirm API-Gateway key auth unchanged + `/graphql` (+ `static`) routes preserved — verified in `serverless.yml`
 - [x] `uv sync --frozen` in CI — handled by shared `python-run-tests-uv` workflow; lock is frozen-consistent
 - [x] Memory 1024 MB set (P1); CloudWatch watch deferred to post-deploy (Phase 5)
-- [ ] **Address vulns — HELD pending approval:** `urllib3` 2.6.3→2.7.0, `idna` 3.11→3.15, `lxml` 6.0.4→6.1.0 (6 advisories, all transitive)
+- [ ] **Address vulns — deferred to a separate deps PR after the stack lands** (decision 2026-06-23): `urllib3` 2.6.3→2.7.0, `idna` 3.11→3.15, `lxml` 6.0.4→6.1.0 (6 advisories, all transitive)
 - [ ] **Final packaging proof = Phase 5 test-stage deploy** (local `sls package` blocked by SF v4 mandatory AWS account resolution)
 
 ### Phase 5 — Cutover
