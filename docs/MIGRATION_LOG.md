@@ -8,7 +8,8 @@
 - **Owner:** Chris B Chamberlain (chrisbc@artisan.co.nz)
 - **Migration branch:** `migrate/strawberry` (based on `deploy-test`)
 - **Started:** 2026-06-22
-- **Status:** Phase 2 — Schema migration ✅ complete (2026-06-22); next: Phase 3 test infrastructure
+- **Status:** Phase 3 — Test infrastructure ✅ complete (2026-06-23); next: Phase 4 deploy/CI/deps hardening
+- **PRs:** stacked, one per phase — #63 (P0), #64 (P1), #65 (P2), #66 (P3). Base chain: `deploy-test` ← P0 ← P1 ← P2 ← P3.
 - **Why this one first** (runbook §A1): smallest (~7 .py files), zip Lambda, no DynamoDB writes, no auth, minimal external integrations — lowest blast radius. The heavy `nzshm-model` library stays untouched.
 
 ---
@@ -95,7 +96,7 @@ Captured up front so the plan is grounded in what actually exists. Source: code 
 | `LEGACY_API_KEY` chain (Trap #11, §4.3) | ❌ No | API-Gateway key only; preserve that instead |
 | `DB_READ_ONLY` (Trap #12) | ❌ No | no DB |
 | testcontainers / DynamoDB Local / Java (Trap #10) | ❌ No | tests fully local; moto already available if needed |
-| Remove `pull_request.branches:` filter (Trap #14) | ✅ Yes | present in `dev.yml` |
+| Remove `pull_request.branches:` filter (Trap #14) | ✅ Done | removed in P0 branch — stacked PRs were getting no CI until then |
 | Yarn `resolutions` / local-dev plugin traps (§4.7, #16–17) | ⚠️ Low | only `serverless-wsgi` plugin (being removed); no s3rver/dynamodb-local |
 | Lambda memory halve-and-monitor (§4.4, #20) | ✅ Yes | 2048 MB → start at 1024 MB, watch CloudWatch |
 | SDL parity + query corpus replay (Phase 0/3) | ✅ Yes | no corpus today — vendor real queries from tests + clients |
@@ -128,10 +129,13 @@ Captured up front so the plan is grounded in what actually exists. Source: code 
 - [x] `gsim_args` `JSONString` scalar parity (custom strawberry scalar, json.dumps/loads, exact description)
 - [x] **SDL parity ✅ + runtime parity ✅** vs legacy (see below); ruff/mypy clean; 39 legacy tests still pass
 
-### Phase 3 — Tests
-- [ ] Port `graphene.test.Client` → Strawberry test client (add `conftest.py` with a shared fixture)
-- [ ] SDL parity CI check vs `schema.legacy.graphql`
-- [ ] Query-corpus replay job
+### Phase 3 — Tests ✅
+- [x] `tests/conftest.py` — **parametrized `client` fixture** (legacy Graphene + Strawberry) with a `.execute()` shim; the 7 existing schema-test files now run against **both** schemas (their local fixtures removed)
+- [x] `tests/test_schema_parity.py` — SDL parity gate (strawberry vs committed baseline AND vs live legacy)
+- [x] `tests/test_corpus_replay.py` — every vendored corpus query executes on Strawberry with no errors
+- [x] `tests/test_strawberry_http.py` — FastAPI `TestClient` happy-path + GraphiQL + weka query over HTTP
+- [x] testcontainers **not needed** (read-only, fully local) — runbook Trap #10 N/A here
+- [x] Parity + corpus run inside `pytest`, so they're already in CI (shared `python-run-tests-uv` workflow); **87 tests pass**
 
 ### Phase 4 — Deploy / CI / deps
 - [ ] Remove `branches:` filter in `dev.yml` (Trap #14)
@@ -216,5 +220,12 @@ Ported all 7 types + union + JSONString scalar + root query to Strawberry, at st
   4. Custom scalar (`JSONString`) trips mypy `valid-type`; one `# type: ignore[valid-type]`. Global-id args typed `str | None` → coerce via f-string (matches graphql_relay's own f-string coercion) to satisfy mypy without changing output.
   5. Added `graphql-relay>=3.2` as an explicit dep (was transitive via graphene) so id encoding survives graphene removal at cutover.
 - **Next:** Phase 3 — port the test suite to the Strawberry schema (currently tests target legacy `schema_root`), wire `tools/schema_parity.py` + corpus replay into CI.
+
+### 2026-06-23 — stacked PRs + Phase 3 complete
+- **Restructured the single `migrate/strawberry` branch into 3 stacked PRs** (one per phase) via cherry-pick: #63 P0 → `deploy-test`, #64 P1 → P0, #65 P2 → P1. P2's tree is byte-identical to the old branch (only log entry ordering differs). Original `migrate/strawberry` left on origin as a backup.
+- **Trap #14 bit us live:** PRs #64/#65 (base = feature branch) got **no CI** until I removed the `branches: [main, deploy-test]` filter from `dev.yml` (committed on P0, cascade-rebased P1/P2). After that all three PRs ran tests and **passed**. (For same-repo PRs the head branch's workflow runs, so the fix had to be on every head branch → cascade.)
+- **Phase 3 (this branch, #66 → P2):** parametrized `client` fixture runs the 7 existing schema-test files against **both** schemas; added parity / corpus-replay / HTTP tests. **87 pass**, ruff/mypy clean.
+- **Follow-ups (Phase 4):** (1) `strawberry.scalar(NewType(...))` emits a DeprecationWarning ("use `StrawberryConfig.scalar_map`") — defer; changing it risks the `JSONString` SDL name/description, and CI ignores warnings. (2) `mangum` "no current event loop" warning on import — benign.
+- **Next:** Phase 4 — deploy/CI/deps hardening (validate Lambda dep packaging without serverless-wsgi; Dependabot vulns; memory watch).
 
 <!-- Append new dated entries above this line as the migration proceeds. -->

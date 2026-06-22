@@ -1,12 +1,4 @@
-import pytest
-from graphene.test import Client
-
-from nshm_model_graphql_api import __version__, schema
-
-
-@pytest.fixture(scope="module")
-def client():
-    return Client(schema.schema_root)
+from nshm_model_graphql_api import __version__
 
 
 def test_get_about(client):
