@@ -181,4 +181,18 @@ Surveyed the five candidate client repos (weka, kororaa, runzi, toshi-hazard-sto
   3. **Deploy packaging open question (Phase 4):** with `serverless-wsgi` gone, confirmed nothing yet validates how Python deps land in the Lambda zip (no `serverless-python-requirements` in `plugins`; `package.json` has `serverless requirements` scripts; SF v4 may package natively). Flagged inline in `serverless.yml`. Not blocking — branch isn't deployed until Phase 5.
 - **Next:** Phase 2 — port the 7 types (`NshmModel`, source tree + `BranchSource` union, gmm tree) and the Relay `Node` interface into `strawberry_schema.py` / a `models/` layout, preserving the per-type composite-ID delimiter schemes and the `gsim_args` JSON scalar.
 
+### 2026-06-22 — Phase 2 design note: reuse nzshm-model dataclasses as the data layer
+Investigated whether `nzshm-model` (v0.15.0) exposes a schema we could import/extend instead of reproducing types.
+- **No GraphQL schema upstream.** The library uses plain stdlib `@dataclass` (deserialized via `dacite`); declares no `graphene`/`strawberry`/`pydantic` deps (only `dacite`, `lxml`, `nzshm-common`). Nothing GraphQL-shaped to inherit.
+- **The dataclasses ARE a usable data layer** (`nzshm_model.logic_tree.logic_tree_base.BranchSet`, `branch.Branch`, `source_logic_tree.logic_tree.{SourceBranch,SourceBranchSet,SourceLogicTree,InversionSource,DistributedSource}`, `gmcm_logic_tree.logic_tree.{GMCMBranch,GMCMBranchSet,GMCMLogicTree}`).
+- **But our GraphQL types are a deliberate projection, not 1:1** — so we can't expose the dataclasses directly:
+  - inject `model_version` / `branch_set_short_name` (not on the dataclass; threaded from context)
+  - `tag`, `tectonic_region_type` come from dataclass `@property`s
+  - `gsim_args` is JSON-serialized from `Dict`
+  - `BranchInversionSource` exposes 3 of `InversionSource`'s 6 fields; `BranchDistributedSource` 1 of 3
+  - Relay composite `id` is GraphQL-only
+  - Auto-deriving would leak `rupture_rate_scaling`/`type`/`inversion_solution_type`/`values`/`tectonic_region_types`/`branch_id`/`logic_tree_version` and break SDL parity.
+- **Decision:** hand-write the 7 Strawberry types as thin projections whose resolvers read the nzshm-model dataclasses (mirrors the legacy graphene code, preserves parity). Import the dataclasses for resolver type-hints; **skip building a separate pydantic data layer** — the upstream dataclasses already are it.
+- **Runbook feedback candidate:** Phase 2's "keep DynamoDB shapes in `data/models.py` as pydantic BaseModel" assumes you own the data layer. When the upstream library already provides typed dataclasses (Model's case — and likely Solvis's PynamoDB→? path differs), reuse them rather than mirroring into pydantic.
+
 <!-- Append new dated entries above this line as the migration proceeds. -->
