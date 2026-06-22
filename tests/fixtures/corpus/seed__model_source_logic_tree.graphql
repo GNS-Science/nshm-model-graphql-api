@@ -1,0 +1,36 @@
+# client: seed (from tests/test_schema_model_source_logic_tree.py)
+# full source logic tree, including the BranchSource union
+query ModelSourceLogicTree {
+  get_model(version: "NSHM_v1.0.4") {
+    id
+    version
+    title
+    source_logic_tree {
+      id
+      model_version
+      branch_sets {
+        id
+        short_name
+        long_name
+        branches {
+          __typename
+          model_version
+          branch_set_short_name
+          tag
+          weight
+          sources {
+            __typename
+            ... on BranchInversionSource {
+              nrml_id
+              rupture_set_id
+              inversion_id
+            }
+            ... on BranchDistributedSource {
+              nrml_id
+            }
+          }
+        }
+      }
+    }
+  }
+}

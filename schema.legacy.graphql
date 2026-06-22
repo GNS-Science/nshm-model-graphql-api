@@ -1,0 +1,117 @@
+schema {
+  query: QueryRoot
+}
+
+"""This is the entry point for all graphql query operations."""
+type QueryRoot {
+  node(
+    """The ID of the object"""
+    id: ID!
+  ): Node
+
+  """About this API """
+  about: String
+
+  """API version string"""
+  version: String
+  current_model_version: String
+  get_models: [NshmModel]
+  get_model(version: String): NshmModel
+}
+
+"""An object with an ID"""
+interface Node {
+  """The ID of the object"""
+  id: ID!
+}
+
+"""A custom Node representing an entire model."""
+type NshmModel implements Node {
+  """The ID of the object"""
+  id: ID!
+  version: String
+  title: String
+  source_logic_tree: SourceLogicTree
+  gmm_logic_tree: GroundMotionModelLogicTree
+}
+
+"""A custom Node representing the source logic tree of a given model."""
+type SourceLogicTree implements Node {
+  """The ID of the object"""
+  id: ID!
+  model_version: String
+  branch_sets: [SourceBranchSet]
+}
+
+type SourceBranchSet implements Node {
+  """The ID of the object"""
+  id: ID!
+  model_version: String
+  short_name: String
+  long_name: String
+  branches: [SourceLogicTreeBranch]
+}
+
+type SourceLogicTreeBranch implements Node {
+  """The ID of the object"""
+  id: ID!
+  model_version: String
+  branch_set_short_name: String
+  tag: String
+  weight: Float
+  sources: [BranchSource]
+}
+
+union BranchSource = BranchInversionSource | BranchDistributedSource
+
+type BranchInversionSource {
+  nrml_id: ID
+  rupture_set_id: ID
+  inversion_id: ID
+}
+
+type BranchDistributedSource {
+  nrml_id: ID
+}
+
+"""A custom Node representing the GMM logic tree of a given model."""
+type GroundMotionModelLogicTree implements Node {
+  """The ID of the object"""
+  id: ID!
+  model_version: String
+  branch_sets: [GmmBranchSet]
+}
+
+"""
+Ground Motion Model branch sets,
+
+to ensure that the wieghts of the enclosed branches sum to 1.0
+"""
+type GmmBranchSet implements Node {
+  """The ID of the object"""
+  id: ID!
+  model_version: String
+  short_name: String
+  long_name: String
+  tectonic_region_type: String
+  branches: [GmmLogicTreeBranch]
+}
+
+type GmmLogicTreeBranch implements Node {
+  """The ID of the object"""
+  id: ID!
+  model_version: String
+  branch_set_short_name: String
+  gsim_name: String
+  gsim_args: JSONString
+  tectonic_region_type: String
+  weight: Float
+}
+
+"""
+Allows use of a JSON String for input / output from the GraphQL schema.
+
+Use of this type is *not recommended* as you lose the benefits of having a defined, static
+schema (one of the key benefits of GraphQL).
+"""
+scalar JSONString
