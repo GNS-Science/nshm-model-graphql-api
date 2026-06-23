@@ -277,4 +277,10 @@ Ran `drive_live.py` against the **currently-deployed legacy Graphene** model API
 - `drive_live.py` vs the **deployed new Strawberry app** on test = **19/19 match** (oracle == deployed-new). The migrated app is live on test and byte-identical to the legacy it replaced.
 - **Held per instruction:** #68 (vuln bumps) and #69 (this P5 docs PR) remain open; prod NOT promoted. Remaining test-stage step: the manual weka exercise.
 
+### 2026-06-23 — dep upgrade merged + post-upgrade re-validation (still holding prod)
+- The narrow vuln-bump (#68) was **replaced by a clean full `pyup` dependency upgrade (#70)** based on `deploy-test` — patch/minor upgrades, cryptography 49.0.0, lxml 6.1.1, mypy 2.1.0, **nzshm-model 0.15.0→0.15.2**, README poetry→uv. `pip-audit` clean; 87 tests; #68 closed as superseded.
+- **#70 merged → test redeployed** with the new deps (deploy run success). Re-ran `drive_live` (oracle 0.15.2 vs deployed 0.15.2) = **19/19 match** — parity holds across the dep bump (no client-visible change from nzshm-model 0.15.0→0.15.2).
+- **#69 (this P5 docs PR) re-homed** onto `deploy-test`, dropping the redundant vuln-bump commit (kept only P5 docs + `drive_live.py`); base retargeted to `deploy-test`.
+- **Still holding prod.** Remaining: (optional) merge #69; manual weka exercise on test; then promote `deploy-test → main` with the draft-revert-PR + prod `drive_live`/weka + 30-min watch.
+
 <!-- Append new dated entries above this line as the migration proceeds. -->
