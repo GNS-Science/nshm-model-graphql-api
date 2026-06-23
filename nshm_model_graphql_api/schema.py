@@ -1,19 +1,15 @@
-"""Strawberry GraphQL schema (migration target).
+"""Strawberry GraphQL schema.
 
-A faithful port of the legacy Graphene schema (`schema/` package), kept at strict
-SDL + runtime parity with `schema.legacy.graphql`. Resolvers project the
-nzshm-model dataclasses (via `data.py`) into GraphQL types.
+Resolvers project the nzshm-model dataclasses (via `data.py`) into GraphQL types.
+Kept at strict SDL parity with `schema.legacy.graphql` (the original Graphene
+contract); enforced by `tests/test_schema_parity.py`.
 
-Parity choices (see docs/MIGRATION_LOG.md):
-- `auto_camel_case=False` — legacy uses snake_case field names.
-- All scalar/list fields are nullable, matching graphene defaults.
+Design choices (see docs/MIGRATION_LOG.md):
+- `auto_camel_case=False` — snake_case field names (the established client contract).
+- All scalar/list fields are nullable, matching the original Graphene defaults.
 - A **custom** `Node` interface (not `strawberry.relay`) so `id` stays `ID!` and
-  global-ids keep the exact `graphql_relay` base64 encoding the legacy schema and
-  existing clients/tests rely on — Strawberry's relay would introduce a `GlobalID`
-  scalar and diverge.
-
-Once the legacy `schema/` package is removed at cutover, this module can be
-renamed to `schema.py`.
+  global-ids keep the exact `graphql_relay` base64 encoding clients/tests rely on —
+  Strawberry's relay would introduce a `GlobalID` scalar and diverge.
 """
 
 import json

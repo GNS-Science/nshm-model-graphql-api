@@ -1,24 +1,20 @@
 """Shared test fixtures.
 
-During the Graphene → Strawberry migration the `client` fixture is **parametrized
-over both schemas**, so every existing schema test runs against the legacy Graphene
-schema *and* the new Strawberry schema. This enforces behavioural parity with the
-test suite we already trust. At cutover, drop the `"legacy"` param (and the legacy
-imports) and the same tests keep guarding the Strawberry schema.
+The `client` fixture runs the schema tests against the Strawberry schema via a
+small adapter that mimics `graphene.test.Client.execute()` (returns a `{data,
+errors}` dict), so the original test bodies keep working unchanged.
 """
 
 import pytest
-from graphene.test import Client as GrapheneClient
 
-from nshm_model_graphql_api import schema as legacy_schema
-from nshm_model_graphql_api.strawberry_schema import schema as strawberry_schema
+from nshm_model_graphql_api.schema import schema as strawberry_schema
 
 
 class StrawberryClient:
     """Adapter giving the Strawberry schema the `graphene.test.Client.execute()` shape.
 
     Returns a dict with `data` (and `errors` only when present), matching how the
-    existing tests read results (`executed["data"]`, `executed["errors"]`).
+    tests read results (`executed["data"]`, `executed["errors"]`).
     """
 
     def __init__(self, schema):
@@ -32,9 +28,7 @@ class StrawberryClient:
         return out
 
 
-@pytest.fixture(scope="module", params=["legacy", "strawberry"])
-def client(request):
-    """A GraphQL client over the legacy (Graphene) or new (Strawberry) schema."""
-    if request.param == "legacy":
-        return GrapheneClient(legacy_schema.schema_root)
+@pytest.fixture(scope="module")
+def client():
+    """A GraphQL client over the Strawberry schema."""
     return StrawberryClient(strawberry_schema)

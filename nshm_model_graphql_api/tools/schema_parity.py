@@ -30,7 +30,7 @@ def main(argv: list[str]) -> int:
 
     # Keep import-time chatter (nzshm-model warning) off stdout.
     with contextlib.redirect_stdout(sys.stderr):
-        from nshm_model_graphql_api.strawberry_schema import schema
+        from nshm_model_graphql_api.schema import schema
 
     with open(baseline_path) as f:
         legacy = _canonical(f.read())

@@ -290,4 +290,9 @@ Ran `drive_live.py` against the **currently-deployed legacy Graphene** model API
 - **Expanded `PHASE5_CUTOVER.md` §5 (Legacy cleanup)** with the full scope (files to delete, deps to drop — keep `graphql-relay`, tests to trim, `strawberry_schema.py`→`schema.py` rename + import fixups) and a **before-vs-after-promote** note. Decision: cleanup is behaviour-neutral + fully validated, so doing it on `deploy-test` *before* promote (as its own validated commit) is fine here; rollback (revert promote → legacy `main`) is unaffected either way.
 - Still holding prod.
 
+### 2026-06-23 — legacy Graphene/Flask removed (PR `chore/remove-legacy-graphene`, still holding prod)
+- Executed `PHASE5_CUTOVER.md §5` on `deploy-test` (after merging #69 so `drive_live.py`/docs were present). **Deleted:** `nshm_model_graphql_api.py` (Flask app), the `schema/` graphene package (4 files), `tools/dump_legacy_sdl.py`. **Deps dropped:** flask, flask-cors, graphene, graphql-server (+ transitives blinker/itsdangerous); **kept graphql-relay** (node-id encoding). **Renamed** `strawberry_schema.py` → `schema.py` and fixed imports in app.py, conftest, test_schema_parity, test_corpus_replay, tools/schema_parity, tests/smoke/drive_live. **Tests trimmed:** dropped the `legacy` fixture param + the live-legacy parity test.
+- Behaviour-neutral: **SDL parity still holds** (`schema_parity` ✅), ruff/mypy clean, **51 tests pass** (was 87 — the legacy ×2 parametrization is gone). Cleaned `__pycache__` before the `git mv` (runbook trap).
+- Landed as its own PR → `deploy-test` → redeploy test → re-run `drive_live` (see next). **Prod still not promoted.**
+
 <!-- Append new dated entries above this line as the migration proceeds. -->
