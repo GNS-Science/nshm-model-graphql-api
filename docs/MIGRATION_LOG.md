@@ -146,10 +146,12 @@ Captured up front so the plan is grounded in what actually exists. Source: code 
 - [ ] **Address vulns — deferred to a separate deps PR after the stack lands** (decision 2026-06-23): `urllib3` 2.6.3→2.7.0, `idna` 3.11→3.15, `lxml` 6.0.4→6.1.0 (6 advisories, all transitive)
 - [ ] **Final packaging proof = Phase 5 test-stage deploy** (local `sls package` blocked by SF v4 mandatory AWS account resolution)
 
-### Phase 5 — Cutover 🟡 (pre-staged; deploy pending)
+### Phase 5 — Cutover 🟡 (TEST done; prod held)
 - [x] **Pre-staged:** rollback runbook + draft-revert-PR template + triggers, **differential live driver**, manual-weka + promote plan → [`PHASE5_CUTOVER.md`](PHASE5_CUTOVER.md) + `tests/smoke/drive_live.py`
 - [x] **Strategy: active differential validation, not soak** (traffic too low for a metric baseline). Driver replays enumerated queries (every model version + all 7 node types) at the live `/graphql` and diffs byte-for-byte vs the in-process oracle. Validated in-process (19 checks, 0 mismatches).
-- [ ] Deploy to `test` stage (push `deploy-test`); run `drive_live.py` (the real packaging proof); manual weka exercise
+- [x] **Merged P0–P4 to `deploy-test` → DEPLOYED TO TEST** (2026-06-23): one combined merge (#67 carrying #63–#66) → single deploy run **success**. **Phase 4 packaging proven for real**: SF v4 built-in python-requirements packaged the deps; deploy smoke `{about}` passed. `drive_live` vs the deployed Strawberry app = **19/19 match**.
+- [ ] Manual weka exercise against test (point weka at the test endpoint, drive Logic Tree view)
+- [ ] **HOLD** — deps PR (#68) + P5 docs PR (#69) not merged; prod not promoted (awaiting go-ahead)
 - [ ] Promote `deploy-test → main`; open draft revert PR with merge SHA; run driver+weka vs prod; ~30-min log watch
 - [ ] Post-healthy cutover cleanup: delete legacy `schema/` + Flask app + legacy deps + `legacy` test param; rename `strawberry_schema.py` → `schema.py`
 
@@ -268,5 +270,11 @@ Ran `drive_live.py` against the **currently-deployed legacy Graphene** model API
 - Also validated the driver against real infra (URL/x-api-key/network/JSON). Read-only; no changes deployed.
 - **Implication:** cutover is low-risk — the contract is proven identical end-to-end *before* touching the deployment. Post-deploy-to-test, expect `drive_live` green again (oracle == deployed-new, same `uv.lock`).
 - **Also ran vs PROD** (legacy graphene v0.4.2, stack `nzshm22-model-graphql-api-prod`, AWS acct 461564345538 via `nshm-admin` SSO): **19/19 match** too. Both live stages are byte-identical to the new oracle. Prod endpoint/key obtained via `sls info --stage prod` (key not stored). Same account for test+prod.
+
+### 2026-06-23 — TEST cutover live ✅ (holding before deps/prod)
+- Merged the stack **P0–P4 into `deploy-test` as one combined merge** (#67, base retargeted to deploy-test, carrying #63–#66; #63/#67 show MERGED, #64–#66 closed as "landed via #67"). Chose one merge → **one deploy** to avoid pushing a broken intermediate (P1's minimal schema) that could also break the stitched `weka-app-api` test.
+- **Deploy run succeeded** (tests + deploy). This is the real, deferred-from-P4 proof that **SF v4's built-in python-requirements packages the deps** without serverless-wsgi; the deploy's built-in `{about}` smoke passed.
+- `drive_live.py` vs the **deployed new Strawberry app** on test = **19/19 match** (oracle == deployed-new). The migrated app is live on test and byte-identical to the legacy it replaced.
+- **Held per instruction:** #68 (vuln bumps) and #69 (this P5 docs PR) remain open; prod NOT promoted. Remaining test-stage step: the manual weka exercise.
 
 <!-- Append new dated entries above this line as the migration proceeds. -->
