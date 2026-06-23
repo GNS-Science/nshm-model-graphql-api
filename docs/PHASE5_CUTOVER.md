@@ -115,7 +115,37 @@ check one Lambda `REPORT` log line for `Max Memory Used` < 1024 MB (validates th
 4. **Watch prod ~30 min:** `aws logs tail /aws/lambda/<fn-name> --follow --since 1m` for any
    unhandled exception; quick CloudWatch glance that `Errors`/`Throttles` ≈ 0.
 5. **"Healthy" call** once the prod driver run is clean, or **roll back** (§1b) if a trigger fires.
-6. After healthy: at cutover, delete the legacy `schema/` package + Flask app + legacy
-   deps (`flask`, `flask-cors`, `graphene`, `graphql-server`) and the `legacy` test
-   param; rename `strawberry_schema.py` → `schema.py`.
+
+---
+
+## 5. Legacy cleanup
+
+Removing the now-dead Graphene/Flask code + deps. **Behaviour-neutral** (the Strawberry app
+imports none of it) — but it touches several files, so do it as **one discrete commit/PR**,
+not folded into the migration or the version bump.
+
+### Scope (everything that still references legacy)
+- **Delete:**
+  - `nshm_model_graphql_api/nshm_model_graphql_api.py` (legacy Flask app factory)
+  - `nshm_model_graphql_api/schema/` package (graphene `schema_root` + `nshm_model_schema.py`,
+    `nshm_model_sources_schema.py`, `nshm_model_gmms_schema.py`, `__init__.py`)
+  - `nshm_model_graphql_api/tools/dump_legacy_sdl.py` (Phase-0 tool; imports the graphene schema)
+- **Deps (`pyproject.toml`):** drop `flask`, `flask-cors`, `graphene`, `graphql-server`.
+  **Keep `graphql-relay`** — now used by the Strawberry `Node` ids. Then `uv lock` + `uv sync`.
+- **Tests:**
+  - `tests/conftest.py` — drop the `"legacy"` fixture param + the `legacy_schema` import (leave only Strawberry).
+  - `tests/test_schema_parity.py` — drop `test_strawberry_sdl_matches_live_legacy_schema` (and its `legacy_schema` import); keep the committed-baseline check.
+- **Rename** `strawberry_schema.py` → `schema.py` (the deleted `schema/` package frees the name) and fix imports in: `app.py`, `tests/conftest.py`, `tests/test_schema_parity.py`, `tests/test_corpus_replay.py`, `tests/test_strawberry_http.py`, `tools/schema_parity.py`, `tests/smoke/drive_live.py`.
+- **Verify:** `uv run pytest` (87 → fewer, since the `legacy` param drops ~half the parametrized cases), ruff, mypy, and `schema_parity` still green; SDL unchanged vs `schema.legacy.graphql`.
+
+### When — before or after the prod promote?
+The runbook default is **after healthy prod** (keep legacy as an in-place fallback; isolate
+attribution). **Here, before the promote is also fine** because: the migration is exhaustively
+validated (drive_live 19/19 vs deployed-new test *and* legacy prod), the cleanup is
+behaviour-neutral, and we re-validate the cleaned state on test (drive_live + weka + suite)
+*before* promoting — so prod gets the final clean state in one deploy with no dead code shipped.
+Rollback is unaffected either way: reverting the promote merge restores legacy `main` regardless.
+**Recommended here:** do the cleanup as its own commit on `deploy-test`, re-run drive_live + weka
+on test, then promote the clean state. (Trade-off vs after: prod won't carry the legacy code as a
+physical hot-fallback during the watch — but rollback is a revert+redeploy anyway.)
 

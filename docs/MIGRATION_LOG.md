@@ -283,4 +283,11 @@ Ran `drive_live.py` against the **currently-deployed legacy Graphene** model API
 - **#69 (this P5 docs PR) re-homed** onto `deploy-test`, dropping the redundant vuln-bump commit (kept only P5 docs + `drive_live.py`); base retargeted to `deploy-test`.
 - **Still holding prod.** Remaining: (optional) merge #69; manual weka exercise on test; then promote `deploy-test → main` with the draft-revert-PR + prod `drive_live`/weka + 30-min watch.
 
+### 2026-06-23 — version bump 0.5.0 on test + cleanup doc expanded (still holding prod)
+- **Bumped 0.4.2 → 0.5.0** (minor; framework migration) via `bump2version` on `deploy-test` → updates `pyproject.toml`/`package.json`/`__init__.py`. **Gotcha:** `bump2version` does NOT touch `uv.lock` (records the project's own version) → `uv lock --check` failed → added a follow-up `uv lock` commit syncing the lock to 0.5.0. *(Process note: a version bump here needs a paired `uv lock`.)*
+- The `about`/`version` resolvers already read `__version__`, so the bump flows through automatically — deployed test now returns **`version: 0.5.0`** / "…version: 0.5.0!".
+- Test redeployed; **`drive_live` vs test = 19/19** at 0.5.0 (oracle 0.5.0 vs deployed 0.5.0). #69 rebased onto the bumped `deploy-test`.
+- **Expanded `PHASE5_CUTOVER.md` §5 (Legacy cleanup)** with the full scope (files to delete, deps to drop — keep `graphql-relay`, tests to trim, `strawberry_schema.py`→`schema.py` rename + import fixups) and a **before-vs-after-promote** note. Decision: cleanup is behaviour-neutral + fully validated, so doing it on `deploy-test` *before* promote (as its own validated commit) is fine here; rollback (revert promote → legacy `main`) is unaffected either way.
+- Still holding prod.
+
 <!-- Append new dated entries above this line as the migration proceeds. -->
