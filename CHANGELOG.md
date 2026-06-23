@@ -1,12 +1,37 @@
 # Changelog
 
 
-## [unreleased]
+## [0.5.0] - 2026-06-24
+
+Pilot of the four-sibling Graphene → Strawberry migration. Deployed to the test stage and validated (19/19 differential parity vs the live legacy test + prod stages); prod promote pending. See `docs/MIGRATION_LOG.md`.
+
+### Changed
+ - Migrated the GraphQL stack from Graphene 3 / Flask / serverless-wsgi to **Strawberry / FastAPI / Mangum**, preserving the schema at SDL + runtime parity (snake_case via `auto_camel_case=False`, custom `Node` interface for `id: ID!` parity, `BranchSource` union, `gsim_args` JSON scalar)
+ - Lambda dependency packaging now via Serverless Framework v4 built-in python-requirements (dropped `serverless-wsgi`)
+ - Function memory 2048 → 1024 MB
+ - deps: patch (12 pkgs), minor (35 pkgs), major: cryptography 46→49, lxml 6.0→6.1, mypy 1→2 (msgpack 1.2.1 fix blocked by 1-week age cutoff); configured dependency age cutoff
+ - README: replaced poetry commands with uv equivalents
+
+### Added
+ - SDL-parity + client-query-corpus replay test gates; differential live-validation driver (`tests/smoke/drive_live.py`)
+
+### Removed
+ - Legacy Graphene/Flask app, `schema/` package, and deps (`flask`, `flask-cors`, `graphene`, `graphql-server`)
+ - `serverless-plugin-warmup` (unused)
+
+## [0.4.2] - 2026-04-29
 
 ### Changed
  - migrated from poetry to uv
  - dependency upgrades
- - deps: patch (12 pkgs), minor (35 pkgs), major: cryptography 46→49, lxml 6.0→6.1, mypy 1→2 (msgpack 1.2.1 fix blocked by 1-week age cutoff)
+
+## [0.4.1] - 2026-03-18
+
+### Changed
+ - dependency upgrades; add upgrade skill
+ - removed `serverless-python-requirements` plugin
+ - serverless.yml: added organization + app configuration (Serverless Framework v4)
+ - dev.yml: dropped scheduled run
 
 ## [0.4.0] - 2025-10-20
 
