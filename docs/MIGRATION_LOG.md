@@ -267,5 +267,6 @@ Ran `drive_live.py` against the **currently-deployed legacy Graphene** model API
   2. The nzshm-model 0.14→0.15 **data-skew worry is moot** — live data matches the local 0.15.0 oracle exactly, so the version bump is not client-visible. **No need to pin nzshm-model for cutover.**
 - Also validated the driver against real infra (URL/x-api-key/network/JSON). Read-only; no changes deployed.
 - **Implication:** cutover is low-risk — the contract is proven identical end-to-end *before* touching the deployment. Post-deploy-to-test, expect `drive_live` green again (oracle == deployed-new, same `uv.lock`).
+- **Also ran vs PROD** (legacy graphene v0.4.2, stack `nzshm22-model-graphql-api-prod`, AWS acct 461564345538 via `nshm-admin` SSO): **19/19 match** too. Both live stages are byte-identical to the new oracle. Prod endpoint/key obtained via `sls info --stage prod` (key not stored). Same account for test+prod.
 
 <!-- Append new dated entries above this line as the migration proceeds. -->
