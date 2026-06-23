@@ -1,6 +1,6 @@
 [project]
 name = "nshm-model-graphql-api"
-version = "0.4.2"
+version = "0.5.0"
 description = "A graphql API for nzshm-model library."
 authors = [
     {name = "Chris B Chamberlain", email = "chrisbc@artisan.co.nz"},
