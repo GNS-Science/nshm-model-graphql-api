@@ -6,6 +6,7 @@
 ### Changed
  - migrated from poetry to uv
  - dependency upgrades
+ - deps: patch (12 pkgs), minor (35 pkgs), major: cryptography 46→49, lxml 6.0→6.1, mypy 1→2 (msgpack 1.2.1 fix blocked by 1-week age cutoff)
 
 ## [0.4.0] - 2025-10-20
 
