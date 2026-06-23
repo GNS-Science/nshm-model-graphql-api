@@ -8,6 +8,7 @@ exclude-newer-span = "P1W"
 
 [options.exclude-newer-package]
 nzshm-model = false
+nzshm-common = false
 
 [[package]]
 name = "annotated-doc"

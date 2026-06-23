@@ -58,7 +58,7 @@ packages = ["nshm_model_graphql_api"]
 [tool.uv]
 exclude-newer = "1 week"
 # nzshm-model ships fresh — always resolve to latest.
-exclude-newer-package = { "nzshm-model" = false }
+exclude-newer-package = { "nzshm-model" = false, "nzshm-common" = false }
 
 [tool.ruff]
 line-length = 120
