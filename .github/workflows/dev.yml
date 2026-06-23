@@ -3,8 +3,9 @@ name: Dev workflow
 on:
 #  schedule:
 #    - cron:  '25 5 * * 0' # At 05:25 on Sunday
+  # No `branches:` filter — run tests on every PR regardless of base, so stacked
+  # PRs (base = a feature branch) aren't silently skipped (migration runbook Trap #14).
   pull_request:
-    branches: [main, deploy-test]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:

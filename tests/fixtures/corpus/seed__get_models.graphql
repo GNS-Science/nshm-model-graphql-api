@@ -1,0 +1,8 @@
+# client: seed (from tests/test_schema_models.py) — list all models
+query GetModels {
+  get_models {
+    id
+    version
+    title
+  }
+}

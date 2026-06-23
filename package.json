@@ -7,7 +7,8 @@
         "requirements_1": "serverless requirements clean",
         "requirements_2": "serverless requirements cleanCache",
         "dummy_pkg": "serverless package --stage dummy",
-        "deploy": "serverless deploy --stage ${STAGE}",
+        "export_requirements": "uv export --no-hashes --no-emit-project --no-editable --no-annotate --format requirements-txt > requirements.txt",
+        "deploy": "yarn export_requirements && serverless deploy --stage ${STAGE}",
         "sls_doctor": "serverless doctor"
     },
     "repository": {
@@ -21,8 +22,7 @@
     "homepage": "https://github.com/GNS-Science/nshm-toshi-api#readme",
     "dependencies": {
         "serverless": "^4.34.0",
-        "serverless-plugin-warmup": "^8.4.1",
-        "serverless-wsgi": "^3.1.0"
+        "serverless-plugin-warmup": "^8.4.1"
     },
     "packageManager": "yarn@4.14.1"
 }
