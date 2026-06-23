@@ -32,7 +32,7 @@ os.environ.setdefault("TESTING", "1")  # keep app/library side effects quiet at 
 import httpx  # noqa: E402
 
 from nshm_model_graphql_api import data  # noqa: E402
-from nshm_model_graphql_api.strawberry_schema import schema  # noqa: E402
+from nshm_model_graphql_api.schema import schema  # noqa: E402
 
 CORPUS_DIR = pathlib.Path(__file__).parent.parent / "fixtures" / "corpus"
 FULL_QUERY = (CORPUS_DIR / "weka__logic_tree_page.graphql").read_text()

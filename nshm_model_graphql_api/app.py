@@ -1,18 +1,14 @@
-"""FastAPI + Mangum entry point (migration target).
+"""FastAPI + Mangum entry point.
 
-Replaces the legacy Flask app (`nshm_model_graphql_api.py`) + serverless-wsgi.
 The Lambda handler is `nshm_model_graphql_api.app.handler` (Mangum), wired in
-`serverless.yml`.
-
-The `/graphql` path is preserved — clients are hardcoded to it (runbook
-"API Gateway URL" note).
+`serverless.yml`. The `/graphql` path is preserved — clients are hardcoded to it.
 """
 
 from fastapi import FastAPI
 from mangum import Mangum
 from strawberry.fastapi import GraphQLRouter
 
-from nshm_model_graphql_api.strawberry_schema import schema
+from nshm_model_graphql_api.schema import schema
 
 app = FastAPI(title="nshm-model-graphql-api")
 

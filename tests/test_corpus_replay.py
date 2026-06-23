@@ -10,7 +10,7 @@ import pathlib
 import pytest
 from graphql_relay import to_global_id
 
-from nshm_model_graphql_api.strawberry_schema import schema
+from nshm_model_graphql_api.schema import schema
 
 CORPUS_DIR = pathlib.Path(__file__).parent / "fixtures" / "corpus"
 CORPUS = sorted(CORPUS_DIR.glob("*.graphql"))
