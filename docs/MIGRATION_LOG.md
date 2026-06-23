@@ -262,7 +262,7 @@ Cutover assets prepared on `migrate/strawberry-p5-cutover` (stacked on the deps-
 - `PHASE5_CUTOVER.md` §1–§4 updated accordingly.
 
 ### 2026-06-23 — differential driver run vs LIVE legacy test stage: 19/19 match ✅
-Ran `drive_live.py` against the **currently-deployed legacy Graphene** model API on the `test` stage (direct execute-api endpoint `fu7kuwhxed…/test/graphql`; key supplied out-of-band, not stored). Identity confirmed: `about` → "Hello, I am nshm_model_graphql_api, version: 0.4.2", root `QueryRoot` with all 6 fields.
+Ran `drive_live.py` against the **currently-deployed legacy Graphene** model API on the `test` stage (direct execute-api endpoint; URL + key supplied out-of-band, not stored). Identity confirmed: `about` → "Hello, I am nshm_model_graphql_api, version: 0.4.2", root `QueryRoot` with all 6 fields.
 - **Result: 19 checks, 0 mismatches** — 3 corpus queries + both model versions × (full tree + a `node(id)` for all 7 Relay types). The new Strawberry oracle is byte-for-byte identical to what AWS serves today.
 - **Two risks retired empirically:**
   1. Parity holds not just vs our local legacy, but vs the **live deployment**.
