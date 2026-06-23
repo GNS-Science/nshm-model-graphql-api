@@ -40,14 +40,6 @@ custom:
       - '**/*.egg-info*'
     noDeploy:
       - botocore
-    
-  #Lambda warmer see https://www.serverless.com/plugins/serverless-plugin-warmup
-  # warmup:
-  #   lowConcurrencyWarmer:
-  #     enabled: true
-  #     events:
-  #       - schedule: rate(5 minutes)
-  #     concurrency: 1
 
 # DRY constants: define all compound/generated names in one place
 # Override args are: .. defaults:
@@ -126,9 +118,4 @@ functions:
           method: GET                                       
     environment:
       STACK_NAME: ${self:custom.stack_name}
-    # warmup:
-    #   lowConcurrencyWarmer:
-    #     enabled:
-    #       - test
-    #       - prod
 

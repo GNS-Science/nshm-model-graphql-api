@@ -201,7 +201,6 @@ __metadata:
   resolution: "nshm-model-graphql-api@workspace:."
   dependencies:
     serverless: "npm:^4.34.0"
-    serverless-plugin-warmup: "npm:^8.4.1"
   languageName: unknown
   linkType: soft
 
@@ -237,13 +236,6 @@ __metadata:
   bin:
     rimraf: dist/esm/bin.mjs
   checksum: 10c0/7da4fd0e15118ee05b918359462cfa1e7fe4b1228c7765195a45b55576e8c15b95db513b8466ec89129666f4af45ad978a3057a02139afba1a63512a2d9644cc
-  languageName: node
-  linkType: hard
-
-"serverless-plugin-warmup@npm:^8.4.1":
-  version: 8.4.1
-  resolution: "serverless-plugin-warmup@npm:8.4.1"
-  checksum: 10c0/b82f81f1600764a57ea7775ecaec347052c27e080f49b17b50b6f66dc4449aa3de2cb7539cb1ff6f1f7e9aba4c1bad4a1acea826ddf48a6041a28eea20c19529
   languageName: node
   linkType: hard
 
