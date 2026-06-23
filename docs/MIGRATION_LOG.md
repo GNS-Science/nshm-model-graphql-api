@@ -146,9 +146,14 @@ Captured up front so the plan is grounded in what actually exists. Source: code 
 - [ ] **Address vulns — deferred to a separate deps PR after the stack lands** (decision 2026-06-23): `urllib3` 2.6.3→2.7.0, `idna` 3.11→3.15, `lxml` 6.0.4→6.1.0 (6 advisories, all transitive)
 - [ ] **Final packaging proof = Phase 5 test-stage deploy** (local `sls package` blocked by SF v4 mandatory AWS account resolution)
 
-### Phase 5 — Cutover
-- [ ] Deploy to `test` stage from `deploy-test`; run corpus + smoke (`{about}`)
-- [ ] Pre-stage rollback PR; promote `deploy-test → main`; watch prod 30 min
+### Phase 5 — Cutover 🟡 (TEST done; prod held)
+- [x] **Pre-staged:** rollback runbook + draft-revert-PR template + triggers, **differential live driver**, manual-weka + promote plan → [`PHASE5_CUTOVER.md`](PHASE5_CUTOVER.md) + `tests/smoke/drive_live.py`
+- [x] **Strategy: active differential validation, not soak** (traffic too low for a metric baseline). Driver replays enumerated queries (every model version + all 7 node types) at the live `/graphql` and diffs byte-for-byte vs the in-process oracle. Validated in-process (19 checks, 0 mismatches).
+- [x] **Merged P0–P4 to `deploy-test` → DEPLOYED TO TEST** (2026-06-23): one combined merge (#67 carrying #63–#66) → single deploy run **success**. **Phase 4 packaging proven for real**: SF v4 built-in python-requirements packaged the deps; deploy smoke `{about}` passed. `drive_live` vs the deployed Strawberry app = **19/19 match**.
+- [ ] Manual weka exercise against test (point weka at the test endpoint, drive Logic Tree view)
+- [ ] **HOLD** — deps PR (#68) + P5 docs PR (#69) not merged; prod not promoted (awaiting go-ahead)
+- [ ] Promote `deploy-test → main`; open draft revert PR with merge SHA; run driver+weka vs prod; ~30-min log watch
+- [ ] Post-healthy cutover cleanup: delete legacy `schema/` + Flask app + legacy deps + `legacy` test param; rename `strawberry_schema.py` → `schema.py`
 
 ---
 
@@ -240,5 +245,49 @@ Ported all 7 types + union + JSONString scalar + root query to Strawberry, at st
 - **Decision to revisit:** `deploy` generates `requirements.txt` explicitly even though the built-in is uv-aware — kept for determinism/portability; if Phase 5 shows the built-in prefers `uv.lock`, drop the generation.
 - 87 tests pass; `yarn install --immutable` clean.
 - **Next:** get approval on the vuln bumps; then Phase 5 — deploy to test stage (the packaging proof), run corpus + smoke, soak, promote.
+
+### 2026-06-23 — Phase 5 pre-staged (deploy still pending)
+Cutover assets prepared on `migrate/strawberry-p5-cutover` (stacked on the deps-bump branch):
+- `docs/PHASE5_CUTOVER.md` — confirms **in-place replacement** (same stack/function/routes/URL; rollback = redeploy previous code), with: §1 rollback (test + prod, draft-revert-PR template, trigger criteria), §2 smoke, §3 soak (baseline + short soak; Model is the soak-skip candidate), §4 promote & 30-min prod watch + post-healthy cleanup list.
+- `tests/smoke/replay_corpus.py` — replays the full corpus against a live deployed URL+API key (not collected by unit pytest); this is the **real packaging proof** deferred from Phase 4.
+- Vuln-bump deps PR (#68) done earlier today; `pip-audit` clean.
+- **Not yet done (needs AWS creds + go-ahead):** capture baseline, deploy to test, smoke, soak, promote.
+
+### 2026-06-23 — Phase 5 validation strategy pivot (low traffic)
+- Model's traffic is too low for a passive soak / CloudWatch baseline to mean anything, so swapped the strategy to **active differential validation**:
+  - `tests/smoke/drive_live.py` — drives the live `/graphql` and compares each response **byte-for-byte against the in-process schema oracle** (proven == legacy). Enumerates every model version + a `node(id)` per Relay type per version, plus no-var corpus queries. (Replaces the simpler `replay_corpus.py`.)
+  - **Manual weka exercise** — point weka at the deployed API, drive the Logic Tree view (the real `LogicTreePageQuery`).
+  - CloudWatch demoted to a quick glance (Errors/Throttles ≈ 0; one `Max Memory Used` log line to confirm 1024 MB is enough).
+- Validated the driver in-process via Starlette `TestClient` (local app == oracle): **19 checks, 0 mismatches**. Rollback trigger is now "driver reports any mismatch", not a metric threshold.
+- `PHASE5_CUTOVER.md` §1–§4 updated accordingly.
+
+### 2026-06-23 — differential driver run vs LIVE legacy test stage: 19/19 match ✅
+Ran `drive_live.py` against the **currently-deployed legacy Graphene** model API on the `test` stage (direct execute-api endpoint; URL + key supplied out-of-band, not stored). Identity confirmed: `about` → "Hello, I am nshm_model_graphql_api, version: 0.4.2", root `QueryRoot` with all 6 fields.
+- **Result: 19 checks, 0 mismatches** — 3 corpus queries + both model versions × (full tree + a `node(id)` for all 7 Relay types). The new Strawberry oracle is byte-for-byte identical to what AWS serves today.
+- **Two risks retired empirically:**
+  1. Parity holds not just vs our local legacy, but vs the **live deployment**.
+  2. The nzshm-model 0.14→0.15 **data-skew worry is moot** — live data matches the local 0.15.0 oracle exactly, so the version bump is not client-visible. **No need to pin nzshm-model for cutover.**
+- Also validated the driver against real infra (URL/x-api-key/network/JSON). Read-only; no changes deployed.
+- **Implication:** cutover is low-risk — the contract is proven identical end-to-end *before* touching the deployment. Post-deploy-to-test, expect `drive_live` green again (oracle == deployed-new, same `uv.lock`).
+- **Also ran vs PROD** (legacy graphene v0.4.2, stack `nzshm22-model-graphql-api-prod`, AWS acct 461564345538 via `nshm-admin` SSO): **19/19 match** too. Both live stages are byte-identical to the new oracle. Prod endpoint/key obtained via `sls info --stage prod` (key not stored). Same account for test+prod.
+
+### 2026-06-23 — TEST cutover live ✅ (holding before deps/prod)
+- Merged the stack **P0–P4 into `deploy-test` as one combined merge** (#67, base retargeted to deploy-test, carrying #63–#66; #63/#67 show MERGED, #64–#66 closed as "landed via #67"). Chose one merge → **one deploy** to avoid pushing a broken intermediate (P1's minimal schema) that could also break the stitched `weka-app-api` test.
+- **Deploy run succeeded** (tests + deploy). This is the real, deferred-from-P4 proof that **SF v4's built-in python-requirements packages the deps** without serverless-wsgi; the deploy's built-in `{about}` smoke passed.
+- `drive_live.py` vs the **deployed new Strawberry app** on test = **19/19 match** (oracle == deployed-new). The migrated app is live on test and byte-identical to the legacy it replaced.
+- **Held per instruction:** #68 (vuln bumps) and #69 (this P5 docs PR) remain open; prod NOT promoted. Remaining test-stage step: the manual weka exercise.
+
+### 2026-06-23 — dep upgrade merged + post-upgrade re-validation (still holding prod)
+- The narrow vuln-bump (#68) was **replaced by a clean full `pyup` dependency upgrade (#70)** based on `deploy-test` — patch/minor upgrades, cryptography 49.0.0, lxml 6.1.1, mypy 2.1.0, **nzshm-model 0.15.0→0.15.2**, README poetry→uv. `pip-audit` clean; 87 tests; #68 closed as superseded.
+- **#70 merged → test redeployed** with the new deps (deploy run success). Re-ran `drive_live` (oracle 0.15.2 vs deployed 0.15.2) = **19/19 match** — parity holds across the dep bump (no client-visible change from nzshm-model 0.15.0→0.15.2).
+- **#69 (this P5 docs PR) re-homed** onto `deploy-test`, dropping the redundant vuln-bump commit (kept only P5 docs + `drive_live.py`); base retargeted to `deploy-test`.
+- **Still holding prod.** Remaining: (optional) merge #69; manual weka exercise on test; then promote `deploy-test → main` with the draft-revert-PR + prod `drive_live`/weka + 30-min watch.
+
+### 2026-06-23 — version bump 0.5.0 on test + cleanup doc expanded (still holding prod)
+- **Bumped 0.4.2 → 0.5.0** (minor; framework migration) via `bump2version` on `deploy-test` → updates `pyproject.toml`/`package.json`/`__init__.py`. **Gotcha:** `bump2version` does NOT touch `uv.lock` (records the project's own version) → `uv lock --check` failed → added a follow-up `uv lock` commit syncing the lock to 0.5.0. *(Process note: a version bump here needs a paired `uv lock`.)*
+- The `about`/`version` resolvers already read `__version__`, so the bump flows through automatically — deployed test now returns **`version: 0.5.0`** / "…version: 0.5.0!".
+- Test redeployed; **`drive_live` vs test = 19/19** at 0.5.0 (oracle 0.5.0 vs deployed 0.5.0). #69 rebased onto the bumped `deploy-test`.
+- **Expanded `PHASE5_CUTOVER.md` §5 (Legacy cleanup)** with the full scope (files to delete, deps to drop — keep `graphql-relay`, tests to trim, `strawberry_schema.py`→`schema.py` rename + import fixups) and a **before-vs-after-promote** note. Decision: cleanup is behaviour-neutral + fully validated, so doing it on `deploy-test` *before* promote (as its own validated commit) is fine here; rollback (revert promote → legacy `main`) is unaffected either way.
+- Still holding prod.
 
 <!-- Append new dated entries above this line as the migration proceeds. -->
