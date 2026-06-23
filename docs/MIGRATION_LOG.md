@@ -259,4 +259,13 @@ Cutover assets prepared on `migrate/strawberry-p5-cutover` (stacked on the deps-
 - Validated the driver in-process via Starlette `TestClient` (local app == oracle): **19 checks, 0 mismatches**. Rollback trigger is now "driver reports any mismatch", not a metric threshold.
 - `PHASE5_CUTOVER.md` §1–§4 updated accordingly.
 
+### 2026-06-23 — differential driver run vs LIVE legacy test stage: 19/19 match ✅
+Ran `drive_live.py` against the **currently-deployed legacy Graphene** model API on the `test` stage (direct execute-api endpoint `fu7kuwhxed…/test/graphql`; key supplied out-of-band, not stored). Identity confirmed: `about` → "Hello, I am nshm_model_graphql_api, version: 0.4.2", root `QueryRoot` with all 6 fields.
+- **Result: 19 checks, 0 mismatches** — 3 corpus queries + both model versions × (full tree + a `node(id)` for all 7 Relay types). The new Strawberry oracle is byte-for-byte identical to what AWS serves today.
+- **Two risks retired empirically:**
+  1. Parity holds not just vs our local legacy, but vs the **live deployment**.
+  2. The nzshm-model 0.14→0.15 **data-skew worry is moot** — live data matches the local 0.15.0 oracle exactly, so the version bump is not client-visible. **No need to pin nzshm-model for cutover.**
+- Also validated the driver against real infra (URL/x-api-key/network/JSON). Read-only; no changes deployed.
+- **Implication:** cutover is low-risk — the contract is proven identical end-to-end *before* touching the deployment. Post-deploy-to-test, expect `drive_live` green again (oracle == deployed-new, same `uv.lock`).
+
 <!-- Append new dated entries above this line as the migration proceeds. -->
