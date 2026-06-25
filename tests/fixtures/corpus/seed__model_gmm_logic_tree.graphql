@@ -1,0 +1,26 @@
+# client: seed (from tests/test_schema_model_gmm_logic_tree.py)
+# full GMM logic tree, including the gsim_args JSON scalar
+query ModelGmmLogicTree {
+  get_model(version: "NSHM_v1.0.4") {
+    id
+    version
+    gmm_logic_tree {
+      id
+      model_version
+      branch_sets {
+        id
+        short_name
+        long_name
+        tectonic_region_type
+        branches {
+          model_version
+          branch_set_short_name
+          gsim_name
+          gsim_args
+          tectonic_region_type
+          weight
+        }
+      }
+    }
+  }
+}

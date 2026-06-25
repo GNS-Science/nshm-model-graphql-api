@@ -1,0 +1,6 @@
+# client: seed (from tests/test_schema_info.py) — root info fields
+query RootInfo {
+  about
+  version
+  current_model_version
+}

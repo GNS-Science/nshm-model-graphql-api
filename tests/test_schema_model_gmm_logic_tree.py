@@ -1,16 +1,8 @@
 import json
 
 import pytest
-from graphene.test import Client
-
-from nshm_model_graphql_api import schema
 
 # from graphql_relay import to_global_id
-
-
-@pytest.fixture(scope="module")
-def client():
-    return Client(schema.schema_root)
 
 
 @pytest.mark.parametrize(

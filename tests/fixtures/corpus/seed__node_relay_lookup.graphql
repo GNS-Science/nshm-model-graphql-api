@@ -1,0 +1,44 @@
+# client: seed (from tests/test_schema_*_as_relay_node.py)
+# Relay global-ID lookup via the Node interface. The `id` value is a
+# base64 global id (e.g. to_global_id("NshmModel", "NSHM_v1.0.4")); replace
+# at replay time. Exercises inline fragments across the Node-implementing types.
+query NodeLookup($id: ID!) {
+  node(id: $id) {
+    id
+    __typename
+    ... on NshmModel {
+      version
+      title
+    }
+    ... on SourceLogicTree {
+      model_version
+    }
+    ... on SourceBranchSet {
+      model_version
+      short_name
+      long_name
+    }
+    ... on SourceLogicTreeBranch {
+      model_version
+      branch_set_short_name
+      tag
+      weight
+    }
+    ... on GroundMotionModelLogicTree {
+      model_version
+    }
+    ... on GmmBranchSet {
+      model_version
+      short_name
+      long_name
+      tectonic_region_type
+    }
+    ... on GmmLogicTreeBranch {
+      model_version
+      branch_set_short_name
+      gsim_name
+      gsim_args
+      weight
+    }
+  }
+}

@@ -1,0 +1,4 @@
+# client: deploy-to-aws.yaml smoke test (post-deploy health check)
+query QueryRoot {
+  about
+}
