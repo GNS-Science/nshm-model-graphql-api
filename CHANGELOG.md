@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+ - deps (uv): major: cryptography 49→50, filelock 3.29→3.32 (4.x not resolvable); minor+patch: in-range `uv lock --upgrade` (80 lock entries)
+ - deps (yarn): serverless 4.34→4.46 (clears transitive brace-expansion/glob/minimatch/undici advisories)
+
 
 ## [0.5.0] - 2026-06-24
 
