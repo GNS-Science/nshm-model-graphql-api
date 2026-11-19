@@ -3,7 +3,7 @@
 ### Environment setup
 
  - clone the repo
- - check/install a recent node version >=22
+ - check/install a recent node version >=24
    `nvm use 22`
 
 - setup python env
@@ -48,11 +48,6 @@ uv run pip-audit -r audit.txt -s pypi --require-hashes
 uv run pip-audit -r audit.txt -s osv --require-hashes
 
 uv tree --package {package-name}
-```
-
-### `safety` requires user login registration, but seems closer to dependabot in detections.
-```
-uv run safety scan
 ```
 
 ### Node
