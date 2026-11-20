@@ -4,7 +4,7 @@
 
  - clone the repo
  - check/install a recent node version >=24
-   `nvm use 22`
+   `nvm use 24`
 
 - setup python env
 ```
