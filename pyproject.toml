@@ -35,7 +35,6 @@ dev = [
     "pytest-cov",
     "pytest",
     "ruff",
-    "safety",
     "sgqlc",
     "tox",
     "tox-uv",
