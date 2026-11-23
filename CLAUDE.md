@@ -58,7 +58,7 @@ Serverless Framework v4 deploys a zip Lambda (Python 3.12, 1024 MB, 10s timeout)
 
 ## Tech Stack
 
-- **Runtime**: Python 3.12, Node 22 (for the Serverless CLI)
+- **Runtime**: Python 3.12, Node 24 (for the Serverless CLI)
 - **GraphQL/web**: Strawberry, FastAPI, Mangum
 - **Package managers**: uv (Python), Yarn v4 (Node)
 - **Testing**: pytest (Strawberry schema; SDL-parity + live corpus-replay checks)
