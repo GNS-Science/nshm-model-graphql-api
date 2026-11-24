@@ -5,6 +5,11 @@
 ### Changed
  - deps (uv): major: cryptography 49→50, filelock 3.29→3.32 (4.x not resolvable); minor+patch: in-range `uv lock --upgrade` (80 lock entries)
  - deps (yarn): serverless 4.34→4.46 (clears transitive brace-expansion/glob/minimatch/undici advisories)
+ - deps (uv): nzshm-model 0.15→0.16 (nzshm-common 0.10→0.11); transitive filelock 3→4, cachetools 7→8
+ - CI: deploy workflow uses Node 24
+
+### Removed
+ - deps: safety (dev dependency, tox audit step and `.safety-project.ini`)
 
 
 ## [0.5.0] - 2026-06-24
